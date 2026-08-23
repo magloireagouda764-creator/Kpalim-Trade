@@ -1,0 +1,9 @@
+export const APP_NAME = 'Kpalimé-Trad';
+export const APP_DESCRIPTION = 'La plateforme numérique de référence de Kpalimé : commerce, tourisme, culture, artisanat, hébergement, restauration, événements et services locaux.';
+export const DEFAULT_CURRENCY = 'XOF' as const;
+export const CURRENCIES = ['XOF', 'USD', 'EUR'] as const;
+export const USER_ROLES = ['client', 'vendor', 'professional', 'admin'] as const;
+export const ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered', 'cancelled'] as const;
+export const SHOP_STATUSES = ['pending', 'approved', 'rejected', 'suspended'] as const;
+export const ITEMS_PER_PAGE = 12;
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
