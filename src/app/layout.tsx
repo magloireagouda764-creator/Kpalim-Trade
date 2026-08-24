@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { Header } from '@/components/layout/Header';
 import { MobileNav } from '@/components/layout/MobileNav';
+import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CartProvider>
               <Header />
               <main className="flex-1 animate-fade-in">{children}</main>
+              <Footer />
               <MobileNav />
             </CartProvider>
           </CurrencyProvider>
