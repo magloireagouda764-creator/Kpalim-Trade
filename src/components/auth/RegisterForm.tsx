@@ -45,7 +45,8 @@ export function RegisterForm() {
       }
 
       login('', data.user);
-      router.push(role === 'vendor' ? '/vendor/dashboard' : '/dashboard');
+      const roleRedirect = role === 'vendor' ? '/vendor/dashboard' : '/dashboard';
+      router.push(roleRedirect);
     } catch {
       setError('Erreur réseau');
     } finally {
@@ -69,7 +70,9 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-gray-500">
         Déjà inscrit ?{' '}
-        <Link href="/login" className="text-kpalime-green font-medium hover:underline" prefetch>Se connecter</Link>
+        <Link href="/auth/login" className="text-kpalime-green font-medium hover:underline" prefetch>
+          Se connecter
+        </Link>
       </p>
     </form>
   );

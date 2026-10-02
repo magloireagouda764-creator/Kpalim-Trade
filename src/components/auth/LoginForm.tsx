@@ -14,7 +14,8 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
-  const redirect = useSearchParams().get('redirect') || '/dashboard';
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +36,14 @@ export function LoginForm() {
       }
 
       login('', data.user);
-      router.push(redirect);
+
+      const roleRedirect = data.user.role === 'vendor'
+        ? '/vendor/dashboard'
+        : data.user.role === 'admin'
+        ? '/admin/dashboard'
+        : '/dashboard';
+
+      router.push(redirect || roleRedirect);
     } catch {
       setError('Erreur réseau');
     } finally {
@@ -56,7 +64,9 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-gray-500">
         Pas encore de compte ?{' '}
-        <Link href="/register" className="text-kpalime-green font-medium hover:underline" prefetch>S'inscrire</Link>
+        <Link href="/auth/register" className="text-kpalime-green font-medium hover:underline" prefetch>
+          S'inscrire
+        </Link>
       </p>
     </form>
   );
