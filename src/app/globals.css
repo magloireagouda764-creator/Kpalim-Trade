@@ -1,26 +1,39 @@
 @import "tailwindcss";
 
-/* Styles de base */
+/* ==========================================
+   STYLES DE BASE
+   ========================================== */
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background-color: #ffffff;
+  background-color: #f9fafb;
   color: #1A1A1A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "rlig" 1, "calt" 1;
+  min-height: 100vh;
 }
 
 /* Focus visible pour l'accessibilité */
 *:focus-visible {
   outline: 2px solid #2D5A27;
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* Classes utilitaires personnalisées */
+/* Supprimer le focus bleu par défaut sur les liens/boutons au clic */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==========================================
+   CLASSES UTILITAIRES
+   ========================================== */
 .touch-target {
   min-height: 44px;
   min-width: 44px;
@@ -36,17 +49,35 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Animation pulse pour skeleton */
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-/* Masquer scrollbar sur mobile */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.25s ease-out;
+}
+
+/* ==========================================
+   SCROLLBAR
+   ========================================== */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -56,36 +87,27 @@ body {
   display: none;
 }
 
-/* Animations personnalisées */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+/* Scrollbar personnalisée pour desktop */
+@media (min-width: 1024px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
   }
-  to {
-    opacity: 1;
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
   }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  ::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border-radius: 5px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2D5A27;
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
-}
-
-/* Line clamp pour tronquer le texte */
+/* ==========================================
+   UTILITAIRES TEXTE
+   ========================================== */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -100,7 +122,48 @@ body {
   overflow: hidden;
 }
 
-/* Tabular nums pour aligner les chiffres */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================
+   RESPONSIVE FIXES
+   ========================================== */
+
+/* Empêcher le zoom automatique sur iOS pour les inputs */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Container fluide pour grands écrans */
+@media (min-width: 1536px) {
+  .max-w-7xl {
+    max-width: 1400px;
+  }
+}
+
+/* Amélioration du rendu des images */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Transition douce sur tous les éléments interactifs */
+a, button {
+  transition-property: color, background-color, border-color, transform, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+/* Éviter le surlignage bleu sur mobile au tap */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
