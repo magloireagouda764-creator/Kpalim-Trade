@@ -1,6 +1,6 @@
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import bcrypt from 'bcryptjs';
-import type { JwtPayload, UserRole } from '@/types';
+import type { JwtPayload } from '@/types';
 
 const SECRET = new TextEncoder().encode(process.env.AUTH_SECRET!);
 
@@ -15,7 +15,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function createToken(payload: JwtPayload): Promise<string> {
-  return new SignJWT(payload)
+  return new SignJWT({ ...payload } as JWTPayload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
