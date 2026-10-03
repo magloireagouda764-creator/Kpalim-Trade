@@ -1,6 +1,4 @@
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = { title: 'Hors ligne' };
+'use client';
 
 export default function OfflinePage() {
   return (
@@ -10,7 +8,10 @@ export default function OfflinePage() {
       <p className="text-gray-500 max-w-md">
         Vérifiez votre connexion Internet puis réessayez. Certaines pages déjà visitées peuvent être disponibles hors ligne.
       </p>
-      <button onClick={() => window.location.reload()} className="touch-target inline-flex items-center px-6 py-3 bg-kpalime-green text-white rounded-lg font-medium hover:bg-kpalime-green-light transition-colors">
+      <button
+        onClick={() => window.location.reload()}
+        className="touch-target inline-flex items-center px-6 py-3 bg-kpalime-green text-white rounded-lg font-medium hover:bg-kpalime-green-light transition-colors"
+      >
         Réessayer
       </button>
     </div>
