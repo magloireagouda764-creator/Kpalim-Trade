@@ -9,11 +9,12 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
+/* Boutons RECTANGULAIRES à couleur pleine */
 const variants = {
-  primary: 'bg-kpalime-green text-white hover:bg-kpalime-green-light active:scale-[0.98]',
-  secondary: 'bg-kpalime-earth text-white hover:opacity-90 active:scale-[0.98]',
-  outline: 'border-2 border-kpalime-green text-kpalime-green hover:bg-kpalime-green hover:text-white',
-  ghost: 'text-kpalime-gray hover:bg-gray-100',
+  primary: 'bg-emerald-brand text-white hover:bg-emerald-light active:scale-[0.98] shadow-lg shadow-emerald-brand/20',
+  secondary: 'bg-gold text-night hover:bg-gold-light active:scale-[0.98] shadow-lg shadow-gold/20',
+  outline: 'border-2 border-emerald-brand text-emerald-brand hover:bg-emerald-brand hover:text-white',
+  ghost: 'text-muted hover:bg-white/10 hover:text-white',
 };
 
 const sizes = {
@@ -28,10 +29,10 @@ export const Button = forwardRef<HTMLButtonElement, Props>(
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kpalime-green disabled:opacity-50 disabled:pointer-events-none',
+        'inline-flex items-center justify-center rounded-md font-semibold transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-brand disabled:opacity-50 disabled:pointer-events-none',
         variants[variant],
         sizes[size],
-        className
+        className,
       )}
       {...props}
     >
@@ -43,7 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(
       )}
       {children}
     </button>
-  )
+  ),
 );
 
 Button.displayName = 'Button';

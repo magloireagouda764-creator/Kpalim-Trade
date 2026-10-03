@@ -4,37 +4,27 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import {
-  Home,
-  ShoppingBag,
-  Palmtree,
-  Hotel,
-  UtensilsCrossed,
-  CalendarDays,
-  Wrench,
-  Palette,
-  Search,
-  User,
-  LogIn,
-  UserPlus,
-  LogOut,
-  LayoutDashboard,
-  Store,
-  Settings,
-  ChevronDown,
-  Menu,
-  X,
+  Menu, X, Home, ShoppingBag, UtensilsCrossed, ShoppingCart,
+  Palmtree, Hotel, CalendarDays, Wrench, Palette,
+  LogIn, UserPlus, LogOut, LayoutDashboard, Store, Settings, ChevronDown, Search,
 } from 'lucide-react';
 import { APP_NAME } from '@/lib/constants';
 import { CurrencySelector } from '@/components/currency/CurrencySelector';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 
-const NAV_LINKS = [
+/* Liens principaux : toujours visibles en haut sur PC */
+const PRIMARY_LINKS = [
   { href: '/', label: 'Accueil', icon: Home },
   { href: '/marketplace', label: 'Boutique', icon: ShoppingBag },
+  { href: '/restaurants', label: 'Restaurants', icon: UtensilsCrossed },
+];
+
+/* Liens secondaires : dans le menu ☰ */
+const MENU_LINKS = [
   { href: '/tourism', label: 'Tourisme', icon: Palmtree },
   { href: '/hotels', label: 'Hôtels', icon: Hotel },
-  { href: '/restaurants', label: 'Restaurants', icon: UtensilsCrossed },
   { href: '/events', label: 'Événements', icon: CalendarDays },
   { href: '/services', label: 'Services', icon: Wrench },
   { href: '/culture', label: 'Culture', icon: Palette },
@@ -43,51 +33,61 @@ const NAV_LINKS = [
 export function Header() {
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const { totalItems } = useCart();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
 
-  // Fermer le menu compte quand on clique ailleurs
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
-        setAccountMenuOpen(false);
+    const onClickOutside = (e: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
+        setAccountOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
-  // Fermer le menu mobile au changement de page
   useEffect(() => {
-    setMobileMenuOpen(false);
-    setAccountMenuOpen(false);
+    setMenuOpen(false);
+    setAccountOpen(false);
   }, [pathname]);
 
-  const getDashboardLink = () => {
-    if (!user) return '/dashboard';
-    if (user.role === 'admin') return '/admin/dashboard';
-    if (user.role === 'vendor') return '/vendor/dashboard';
-    return '/dashboard';
-  };
+  const dashboardHref = !user
+    ? '/auth/login'
+    : user.role === 'admin'
+      ? '/admin/dashboard'
+      : user.role === 'vendor'
+        ? '/vendor/dashboard'
+        : '/dashboard';
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-      {/* Barre principale */}
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 group" prefetch>
-          <div className="w-9 h-9 rounded-lg bg-kpalime-green flex items-center justify-center text-white font-bold group-hover:bg-kpalime-green-light transition-colors">
-            KT
-          </div>
-          <span className="text-lg font-bold text-kpalime-green hidden sm:block">
-            {APP_NAME}
-          </span>
-        </Link>
+    <header className="sticky top-0 z-50 bg-night/95 backdrop-blur border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+        {/* Gauche : menu ☰ + logo */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="touch-target p-2 rounded-md text-white hover:bg-white/10 transition-colors"
+            aria-label="Menu principal"
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-        {/* Navigation desktop */}
-        <nav className="hidden lg:flex items-center gap-1 flex-1 max-w-3xl">
-          {NAV_LINKS.map((link) => {
+          <Link href="/" prefetch className="flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-md bg-emerald-brand flex items-center justify-center text-white font-bold group-hover:bg-emerald-light transition-colors">
+              KT
+            </div>
+            <span className="text-lg font-bold text-white hidden sm:block">
+              {APP_NAME}
+            </span>
+          </Link>
+        </div>
+
+        {/* Centre : liens principaux (PC) */}
+        <nav className="hidden md:flex items-center gap-1">
+          {PRIMARY_LINKS.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
             return (
@@ -96,97 +96,92 @@ export function Header() {
                 href={link.href}
                 prefetch
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all touch-target',
+                  'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors touch-target',
                   isActive
-                    ? 'bg-kpalime-green/10 text-kpalime-green'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-kpalime-green',
+                    ? 'bg-emerald-brand text-white'
+                    : 'text-muted hover:bg-white/10 hover:text-white',
                 )}
               >
-                <Icon size={16} />
+                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                 <span>{link.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Actions droite */}
+        {/* Droite : recherche, devise, panier, compte */}
         <div className="flex items-center gap-2 shrink-0">
-          <CurrencySelector />
-
-          {/* Bouton recherche mobile */}
-          <button
-            className="lg:hidden touch-target p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+          <Link
+            href="/search"
+            prefetch
+            className="hidden sm:flex touch-target p-2 rounded-md text-muted hover:bg-white/10 hover:text-white transition-colors"
             aria-label="Rechercher"
           >
-            <Search size={20} />
-          </button>
+            <Search size={24} />
+          </Link>
 
-          {/* Zone authentification */}
+          <CurrencySelector />
+
+          <Link
+            href="/checkout"
+            prefetch
+            className="relative touch-target p-2 rounded-md text-muted hover:bg-white/10 hover:text-white transition-colors"
+            aria-label="Panier"
+          >
+            <ShoppingCart size={24} />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-[10px] font-bold text-night bg-gold rounded-full">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+
           {!isLoading && (
             <>
               {user ? (
-                /* Utilisateur connecté : menu déroulant */
-                <div className="relative" ref={accountMenuRef}>
+                <div className="relative" ref={accountRef}>
                   <button
-                    onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                    className="touch-target flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                    aria-label="Menu compte"
-                    aria-expanded={accountMenuOpen}
+                    onClick={() => setAccountOpen(!accountOpen)}
+                    className="touch-target flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-white/10 transition-colors"
+                    aria-label="Mon compte"
+                    aria-expanded={accountOpen}
                   >
-                    <div className="w-8 h-8 rounded-full bg-kpalime-green flex items-center justify-center text-white text-sm font-bold">
+                    <div className="w-8 h-8 rounded-md bg-emerald-brand flex items-center justify-center text-white text-sm font-bold">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="hidden md:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
-                      {user.name}
-                    </span>
                     <ChevronDown
                       size={16}
-                      className={cn('text-gray-500 transition-transform', accountMenuOpen && 'rotate-180')}
+                      className={cn('text-muted transition-transform', accountOpen && 'rotate-180')}
                     />
                   </button>
 
-                  {accountMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 animate-fade-in">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        <p className="text-xs text-kpalime-green font-medium capitalize mt-1">{user.role}</p>
+                  {accountOpen && (
+                    <div className="absolute right-0 mt-2 w-60 bg-night-light border border-white/10 rounded-md shadow-2xl py-2 animate-fade-in">
+                      <div className="px-4 py-2 border-b border-white/10">
+                        <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+                        <p className="text-xs text-muted truncate">{user.email}</p>
+                        <p className="text-xs text-gold font-medium capitalize mt-1">{user.role}</p>
                       </div>
-                      <Link
-                        href={getDashboardLink()}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        prefetch
-                      >
-                        <LayoutDashboard size={16} className="text-kpalime-green" />
+                      <Link href={dashboardHref} prefetch className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted hover:bg-white/10 hover:text-white transition-colors">
+                        <LayoutDashboard size={18} className="text-emerald-brand" />
                         Tableau de bord
                       </Link>
                       {user.role === 'vendor' && (
-                        <Link
-                          href="/vendor/shop-settings"
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          prefetch
-                        >
-                          <Store size={16} className="text-kpalime-green" />
+                        <Link href="/vendor/shop-settings" prefetch className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted hover:bg-white/10 hover:text-white transition-colors">
+                          <Store size={18} className="text-emerald-brand" />
                           Ma boutique
                         </Link>
                       )}
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        prefetch
-                      >
-                        <Settings size={16} className="text-kpalime-green" />
+                      <Link href="/profile" prefetch className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted hover:bg-white/10 hover:text-white transition-colors">
+                        <Settings size={18} className="text-emerald-brand" />
                         Paramètres
                       </Link>
-                      <div className="border-t border-gray-100 mt-1 pt-1">
+                      <div className="border-t border-white/10 mt-1 pt-1">
                         <button
-                          onClick={() => {
-                            logout();
-                            setAccountMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          onClick={() => { logout(); setAccountOpen(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
                         >
-                          <LogOut size={16} />
+                          <LogOut size={18} />
                           Se déconnecter
                         </button>
                       </div>
@@ -194,22 +189,21 @@ export function Header() {
                   )}
                 </div>
               ) : (
-                /* Utilisateur non connecté : boutons Connexion / Inscription */
                 <>
                   <Link
                     href="/auth/login"
                     prefetch
-                    className="hidden sm:inline-flex touch-target items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 hover:text-kpalime-green transition-colors"
+                    className="hidden sm:inline-flex touch-target items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted hover:bg-white/10 hover:text-white transition-colors"
                   >
-                    <LogIn size={16} />
+                    <LogIn size={24} />
                     <span>Connexion</span>
                   </Link>
                   <Link
                     href="/auth/register"
                     prefetch
-                    className="touch-target inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-kpalime-green text-white rounded-lg hover:bg-kpalime-green-light transition-colors"
+                    className="touch-target inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold bg-emerald-brand text-white hover:bg-emerald-light transition-colors"
                   >
-                    <UserPlus size={16} />
+                    <UserPlus size={24} />
                     <span className="hidden sm:inline">S'inscrire</span>
                     <span className="sm:hidden">Inscription</span>
                   </Link>
@@ -217,24 +211,38 @@ export function Header() {
               )}
             </>
           )}
-
-          {/* Bouton menu mobile */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden touch-target p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
-            aria-label="Menu"
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
         </div>
       </div>
 
-      {/* Menu mobile déroulant */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-100 bg-white animate-slide-up">
-          <nav className="max-w-7xl mx-auto px-4 py-3 space-y-1">
-            {NAV_LINKS.map((link) => {
+      {/* Menu ☰ déroulant (liens secondaires) */}
+      {menuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-night-light border-b border-white/10 shadow-2xl animate-slide-up">
+          <nav className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+            {MENU_LINKS.map((link) => {
+              const Icon = link.icon;
+              const isActive = pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  prefetch
+                  className={cn(
+                    'flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors touch-target',
+                    isActive
+                      ? 'bg-emerald-brand text-white'
+                      : 'text-muted hover:bg-white/10 hover:text-white',
+                  )}
+                >
+                  <Icon size={24} className={isActive ? 'text-white' : 'text-gold'} />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Liens principaux sur mobile (dans le menu) */}
+          <nav className="md:hidden max-w-7xl mx-auto px-4 pb-4 grid grid-cols-1 gap-2 border-t border-white/10 pt-3">
+            {PRIMARY_LINKS.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
               return (
@@ -243,39 +251,15 @@ export function Header() {
                   href={link.href}
                   prefetch
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors touch-target',
-                    isActive
-                      ? 'bg-kpalime-green/10 text-kpalime-green'
-                      : 'text-gray-700 hover:bg-gray-50',
+                    'flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors touch-target',
+                    isActive ? 'bg-emerald-brand text-white' : 'text-muted hover:bg-white/10 hover:text-white',
                   )}
                 >
-                  <Icon size={18} className="text-kpalime-green" />
+                  <Icon size={24} className={isActive ? 'text-white' : 'text-emerald-brand'} />
                   <span>{link.label}</span>
                 </Link>
               );
             })}
-
-            {/* Liens auth mobile */}
-            {!user && (
-              <div className="pt-3 mt-3 border-t border-gray-100 space-y-1">
-                <Link
-                  href="/auth/login"
-                  prefetch
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors touch-target"
-                >
-                  <LogIn size={18} className="text-kpalime-green" />
-                  <span>Connexion</span>
-                </Link>
-                <Link
-                  href="/auth/register"
-                  prefetch
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium bg-kpalime-green text-white touch-target"
-                >
-                  <UserPlus size={18} />
-                  <span>S'inscrire</span>
-                </Link>
-              </div>
-            )}
           </nav>
         </div>
       )}
