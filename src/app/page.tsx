@@ -1,132 +1,267 @@
 import Link from 'next/link';
 import {
-  ShoppingBag, Palmtree, Palette, Shirt, Apple, Sparkles, Lamp, BookOpen, ArrowRight, Store,
+  ShoppingBag,
+  Users,
+  Building2,
+  Hotel,
+  Palmtree,
+  UtensilsCrossed,
+  Wrench,
+  CalendarDays,
+  Palette,
+  ArrowRight,
+  Store,
+  Search,
+  TrendingUp,
+  ShieldCheck,
+  Globe,
 } from 'lucide-react';
-import { APP_NAME } from '@/lib/constants';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 
+const APP_NAME = 'Kpalimé-Trade';
+
 const CATEGORIES = [
-  { name: 'Artisanat', slug: 'artisanat', icon: Palette },
-  { name: 'Mode', slug: 'mode', icon: Shirt },
-  { name: 'Alimentation', slug: 'alimentation', icon: Apple },
-  { name: 'Cosmétiques', slug: 'cosmetiques', icon: Sparkles },
-  { name: 'Décoration', slug: 'decoration', icon: Lamp },
-  { name: 'Culture', slug: 'culture', icon: BookOpen },
+  { name: 'Produits', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
+  { name: 'Fournisseurs', slug: '/services', icon: Users, color: 'from-blue-500/20 to-blue-500/5' },
+  { name: 'Entreprises', slug: '/services', icon: Building2, color: 'from-purple-500/20 to-purple-500/5' },
+  { name: 'Hôtels', slug: '/hotels', icon: Hotel, color: 'from-gold/20 to-gold/5' },
+  { name: 'Tourisme', slug: '/tourism', icon: Palmtree, color: 'from-emerald-brand/20 to-emerald-brand/5' },
+  { name: 'Restaurants', slug: '/restaurants', icon: UtensilsCrossed, color: 'from-orange-500/20 to-orange-500/5' },
+  { name: 'Services', slug: '/services', icon: Wrench, color: 'from-cyan-500/20 to-cyan-500/5' },
+  { name: 'Événements', slug: '/events', icon: CalendarDays, color: 'from-pink-500/20 to-pink-500/5' },
+  { name: 'Cultures', slug: '/culture', icon: Palette, color: 'from-gold/20 to-gold/5' },
+];
+
+const FEATURES = [
+  {
+    icon: Globe,
+    title: 'Marché local & international',
+    description: 'Connectez-vous aux meilleurs producteurs et services du Togo.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Transactions sécurisées',
+    description: 'Paiement à la livraison et vérification des vendeurs.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Croissance continue',
+    description: 'Une plateforme en pleine expansion pour votre business.',
+  },
 ];
 
 export default function HomePage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-14">
-      {/* ===== HERO ===== */}
-      <section className="text-center space-y-6 py-10 relative">
-        <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full bg-emerald-brand/10 blur-3xl" />
+    <div className="bg-night min-h-screen">
+      {/* ============================================
+          HERO SECTION
+      ============================================ */}
+      <section className="relative overflow-hidden">
+        {/* Halos décoratifs */}
+        <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-emerald-brand/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-20 -left-40 w-96 h-96 rounded-full bg-gold/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-40 -right-40 w-96 h-96 rounded-full bg-emerald-brand/10 blur-3xl" />
 
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-md border border-gold/40 bg-gold/10 text-gold text-xs font-semibold uppercase tracking-wider">
-          <Store size={14} />
-          La plateforme de Kpalimé
-        </span>
+        <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24 text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-gold/30 bg-gold/10 text-gold text-xs font-semibold uppercase tracking-wider mb-6">
+            <Globe size={14} />
+            Le Togo ouvre ses portes au monde
+          </div>
 
-        <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight relative">
-          Bienvenue sur <span className="text-emerald-brand">{APP_NAME}</span>
-        </h1>
+          {/* Titre principal */}
+          <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+            {APP_NAME}
+          </h1>
 
-        <p className="text-lg text-muted max-w-2xl mx-auto relative">
-          Le Togo ouvre ses portes au monde.Découvrez les produits, entreprises, services, destinations, établissemments, et richesses culturelles du Togo.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 relative">
-          <Link
-            href="/marketplace"
-            prefetch
-            className="touch-target inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-colors shadow-lg shadow-emerald-brand/25"
-          >
-            <ShoppingBag size={24} />
-            Explorer la boutique
-          </Link>
-          <Link
-            href="/tourism"
-            prefetch
-            className="touch-target inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-colors shadow-lg shadow-gold/25"
-          >
-            <Palmtree size={24} />
-            Découvrir Kpalimé
-          </Link>
-        </div>
-      </section>
-
-      {/* ===== CATÉGORIES ===== */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            Que recherchez-vous?
-            <span className="h-1 w-10 bg-gold rounded-full" />
-          </h2>
-          <Link
-            href="/marketplace"
-            prefetch
-            className="inline-flex items-center gap-1 text-sm font-medium text-gold hover:text-gold-light transition-colors"
-          >
-            Voir tout <ArrowRight size={16} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <Link
-                key={cat.slug}
-                href={`/marketplace/categories/${cat.slug}`}
-                prefetch
-                className="flex flex-col items-center gap-3 p-5 rounded-md bg-night-light border border-white/10 hover:border-gold hover:-translate-y-1 transition-all touch-target"
-              >
-                <Icon size={24} className="text-emerald-brand" />
-                <span className="text-sm font-medium text-white text-center">{cat.name}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ===== PRODUITS VEDETTE ===== */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            Produits en vedette
-            <span className="h-1 w-10 bg-gold rounded-full" />
-          </h2>
-          <Link
-            href="/marketplace"
-            prefetch
-            className="inline-flex items-center gap-1 text-sm font-medium text-gold hover:text-gold-light transition-colors"
-          >
-            Voir tout <ArrowRight size={16} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <ProductCardSkeleton key={i} />
-          ))}
-        </div>
-      </section>
-
-      {/* ===== BANDAU VENDEURS ===== */}
-      <section className="rounded-md bg-night-light border border-white/10 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="text-center md:text-left space-y-2">
-          <h2 className="text-2xl font-bold text-white">Vendez à Kpalimé</h2>
-          <p className="text-muted max-w-xl">
-            Créez votre boutique gratuitement, publiez vos produits et touchez des clients dans toute la région.
+          {/* Slogan */}
+          <p className="text-2xl md:text-3xl font-light text-white/90 mb-4">
+            Le Togo ouvre ses portes au monde.
           </p>
+
+          {/* Sous-titre */}
+          <p className="text-base md:text-lg text-muted max-w-3xl mx-auto mb-10 leading-relaxed">
+            Découvrez les produits, entreprises, services, destinations, établissements
+            et richesses culturelles du Togo.
+          </p>
+
+          {/* Deux gros boutons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
+            <Link
+              href="/marketplace"
+              prefetch
+              className="touch-target flex items-center justify-center gap-3 px-8 py-4 rounded-md bg-emerald-brand text-white font-semibold text-lg hover:bg-emerald-light transition-all shadow-xl shadow-emerald-brand/30 hover:shadow-emerald-brand/50 hover:-translate-y-0.5"
+            >
+              <ShoppingBag size={24} />
+              Explorer les produits
+              <ArrowRight size={20} />
+            </Link>
+
+            <Link
+              href="/tourism"
+              prefetch
+              className="touch-target flex items-center justify-center gap-3 px-8 py-4 rounded-md bg-gold text-night font-semibold text-lg hover:bg-gold-light transition-all shadow-xl shadow-gold/30 hover:shadow-gold/50 hover:-translate-y-0.5"
+            >
+              <Palmtree size={24} />
+              Découvrir le Togo
+              <ArrowRight size={20} />
+            </Link>
+          </div>
         </div>
-        <Link
-          href="/auth/register"
-          prefetch
-          className="touch-target inline-flex items-center gap-2 px-7 py-3.5 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-colors shadow-lg shadow-gold/25 shrink-0"
-        >
-          <Store size={24} />
-          Ouvrir ma boutique
-        </Link>
+      </section>
+
+      {/* ============================================
+          SECTION RECHERCHE / CATÉGORIES
+      ============================================ */}
+      <section className="relative py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Titre de section */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 text-gold text-sm font-semibold uppercase tracking-wider mb-3">
+              <Search size={16} />
+              Recherche rapide
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Que recherchez-vous ?
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Explorez les différentes catégories de notre plateforme
+            </p>
+          </div>
+
+          {/* Grille de catégories */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <Link
+                  key={cat.name}
+                  href={cat.slug}
+                  prefetch
+                  className={`group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br ${cat.color} p-6 hover:border-emerald-brand/50 hover:-translate-y-1 transition-all duration-300 touch-target`}
+                >
+                  <div className="relative z-10 flex flex-col items-center text-center gap-3">
+                    <div className="w-14 h-14 rounded-md bg-white/10 backdrop-blur flex items-center justify-center group-hover:bg-emerald-brand group-hover:scale-110 transition-all duration-300">
+                      <Icon size={28} className="text-white group-hover:text-white" />
+                    </div>
+                    <span className="text-white font-semibold text-sm md:text-base">
+                      {cat.name}
+                    </span>
+                  </div>
+
+                  {/* Effet hover lumineux */}
+                  <div className="absolute inset-0 bg-emerald-brand/0 group-hover:bg-emerald-brand/10 transition-all duration-300" />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          SECTION POURQUOI KPALIMÉ-TRADE
+      ============================================ */}
+      <section className="py-16 md:py-20 bg-night-light/50 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Pourquoi choisir {APP_NAME} ?
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Une plateforme pensée pour le Togo et ouverte au monde
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {FEATURES.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={feature.title}
+                  className="rounded-md border border-white/10 bg-night-light p-6 hover:border-emerald-brand/50 transition-all"
+                >
+                  <div className="w-12 h-12 rounded-md bg-emerald-brand/20 flex items-center justify-center mb-4">
+                    <Icon size={24} className="text-emerald-brand" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-muted text-sm leading-relaxed">{feature.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          SECTION PRODUITS VEDETTE (placeholder)
+      ============================================ */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                Produits en vedette
+                <span className="h-1 w-12 bg-gold rounded-full" />
+              </h2>
+              <p className="text-muted mt-2">Les meilleures offres du moment</p>
+            </div>
+            <Link
+              href="/marketplace"
+              prefetch
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-gold hover:text-gold-light transition-colors"
+            >
+              Voir tout <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+
+          <div className="sm:hidden mt-6 text-center">
+            <Link
+              href="/marketplace"
+              prefetch
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-colors"
+            >
+              Voir tous les produits <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          SECTION CTA VENDEUR
+      ============================================ */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="rounded-md bg-gradient-to-br from-emerald-brand/20 via-night-light to-gold/10 border border-emerald-brand/30 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-brand/20 text-emerald-brand text-xs font-semibold uppercase tracking-wider mb-3">
+                <Store size={14} />
+                Espace vendeur
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                Vendez sur Kpalimé-Trade
+              </h2>
+              <p className="text-muted max-w-xl">
+                Créez votre boutique gratuitement, publiez vos produits et touchez
+                des clients dans tout le Togo et au-delà.
+              </p>
+            </div>
+            <Link
+              href="/auth/register"
+              prefetch
+              className="touch-target inline-flex items-center gap-2 px-7 py-3.5 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all shadow-lg shadow-gold/25 shrink-0"
+            >
+              <Store size={20} />
+              Ouvrir ma boutique
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   );
