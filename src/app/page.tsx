@@ -31,7 +31,7 @@ export default function HomePage() {
         </h1>
 
         <p className="text-lg text-muted max-w-2xl mx-auto relative">
-          Commerce, tourisme, culture, artisanat, hébergement et services locaux de Kpalimé réunis en un seul endroit.
+          Le Togo ouvre ses portes au monde.Découvrez les produits, entreprises, services, destinations, établissemments, et richesses culturelles du Togo.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2 relative">
@@ -58,7 +58,7 @@ export default function HomePage() {
       <section>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            Catégories populaires
+            Que recherchez-vous?
             <span className="h-1 w-10 bg-gold rounded-full" />
           </h2>
           <Link
