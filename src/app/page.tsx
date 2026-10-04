@@ -231,38 +231,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ============================================
-          5. SECTION CTA VENDEUR
-      ============================================ */}
-      <section className="py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="rounded-md bg-gradient-to-br from-emerald-brand/20 via-night-light to-gold/10 border border-emerald-brand/30 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-brand/20 text-emerald-brand text-xs font-semibold uppercase tracking-wider mb-3">
-                <Store size={14} />
-                Espace vendeur
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                Vendez sur Kpalimé-Trade
-              </h2>
-              <p className="text-muted max-w-xl">
-                Créez votre boutique gratuitement, publiez vos produits et touchez
-                des clients dans tout le Togo et au-delà.
-              </p>
-            </div>
-            <Link
-              href="/auth/register"
-              prefetch
-              className="touch-target inline-flex items-center gap-2 px-7 py-3.5 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all shadow-lg shadow-gold/25 shrink-0"
-            >
-              <Store size={20} />
-              Ouvrir ma boutique
-              <ArrowRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
