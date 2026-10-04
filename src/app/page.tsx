@@ -21,8 +21,7 @@ import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 const APP_NAME = 'Kpalimé-Trade';
 
 const CATEGORIES = [
-  { name: 'Produits', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
-  { name: 'Fournisseurs', slug: '/services', icon: Users, color: 'from-blue-500/20 to-blue-500/5' },
+  { name: 'Produits agricoles & agroalimentaires', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
   { name: 'Entreprises', slug: '/services', icon: Building2, color: 'from-purple-500/20 to-purple-500/5' },
   { name: 'Hôtels', slug: '/hotels', icon: Hotel, color: 'from-gold/20 to-gold/5' },
   { name: 'Tourisme', slug: '/tourism', icon: Palmtree, color: 'from-emerald-brand/20 to-emerald-brand/5' },
