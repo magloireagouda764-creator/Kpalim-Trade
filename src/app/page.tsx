@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import {
   ShoppingBag,
-  Users,
   Building2,
   Hotel,
   Palmtree,
@@ -12,16 +11,17 @@ import {
   ArrowRight,
   Store,
   Search,
-  TrendingUp,
-  ShieldCheck,
   Globe,
+  ShieldCheck,
+  TrendingUp,
 } from 'lucide-react';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 
 const APP_NAME = 'Kpalimé-Trade';
 
+// 8 catégories (Fournisseurs retiré)
 const CATEGORIES = [
-  { name: 'Produits agricoles & agroalimentaires', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
+  { name: 'Produits', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
   { name: 'Entreprises', slug: '/services', icon: Building2, color: 'from-purple-500/20 to-purple-500/5' },
   { name: 'Hôtels', slug: '/hotels', icon: Hotel, color: 'from-gold/20 to-gold/5' },
   { name: 'Tourisme', slug: '/tourism', icon: Palmtree, color: 'from-emerald-brand/20 to-emerald-brand/5' },
@@ -31,6 +31,7 @@ const CATEGORIES = [
   { name: 'Cultures', slug: '/culture', icon: Palette, color: 'from-gold/20 to-gold/5' },
 ];
 
+// Section "Pourquoi choisir"
 const FEATURES = [
   {
     icon: Globe,
@@ -53,7 +54,7 @@ export default function HomePage() {
   return (
     <div className="bg-night min-h-screen">
       {/* ============================================
-          HERO SECTION
+          1. HERO SECTION
       ============================================ */}
       <section className="relative overflow-hidden">
         {/* Halos décoratifs */}
@@ -110,7 +111,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================
-          SECTION RECHERCHE / CATÉGORIES
+          2. SECTION RECHERCHE / CATÉGORIES
       ============================================ */}
       <section className="relative py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
@@ -128,8 +129,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Grille de catégories */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {/* Grille de catégories (8 au lieu de 9) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               return (
@@ -141,7 +142,7 @@ export default function HomePage() {
                 >
                   <div className="relative z-10 flex flex-col items-center text-center gap-3">
                     <div className="w-14 h-14 rounded-md bg-white/10 backdrop-blur flex items-center justify-center group-hover:bg-emerald-brand group-hover:scale-110 transition-all duration-300">
-                      <Icon size={28} className="text-white group-hover:text-white" />
+                      <Icon size={28} className="text-white" />
                     </div>
                     <span className="text-white font-semibold text-sm md:text-base">
                       {cat.name}
@@ -158,43 +159,9 @@ export default function HomePage() {
       </section>
 
       {/* ============================================
-          SECTION POURQUOI KPALIMÉ-TRADE
+          3. SECTION PRODUITS VEDETTE
       ============================================ */}
-      <section className="py-16 md:py-20 bg-night-light/50 border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Pourquoi choisir {APP_NAME} ?
-            </h2>
-            <p className="text-muted max-w-2xl mx-auto">
-              Une plateforme pensée pour le Togo et ouverte au monde
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {FEATURES.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.title}
-                  className="rounded-md border border-white/10 bg-night-light p-6 hover:border-emerald-brand/50 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-md bg-emerald-brand/20 flex items-center justify-center mb-4">
-                    <Icon size={24} className="text-emerald-brand" />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-2">{feature.title}</h3>
-                  <p className="text-muted text-sm leading-relaxed">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================
-          SECTION PRODUITS VEDETTE (placeholder)
-      ============================================ */}
-      <section className="py-16 md:py-20">
+      <section className="py-16 md:py-20 bg-night-light/30 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -232,7 +199,41 @@ export default function HomePage() {
       </section>
 
       {/* ============================================
-          SECTION CTA VENDEUR
+          4. SECTION POURQUOI KPALIMÉ-TRADE (REMISE ICI)
+      ============================================ */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Pourquoi choisir {APP_NAME} ?
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Une plateforme pensée pour le Togo et ouverte au monde
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {FEATURES.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  key={feature.title}
+                  className="rounded-md border border-white/10 bg-night-light p-6 hover:border-emerald-brand/50 transition-all"
+                >
+                  <div className="w-12 h-12 rounded-md bg-emerald-brand/20 flex items-center justify-center mb-4">
+                    <Icon size={24} className="text-emerald-brand" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-muted text-sm leading-relaxed">{feature.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          5. SECTION CTA VENDEUR
       ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
