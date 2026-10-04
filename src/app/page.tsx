@@ -21,7 +21,7 @@ const APP_NAME = 'Kpalimé-Trade';
 
 // 8 catégories (Fournisseurs retiré)
 const CATEGORIES = [
-  { name: 'Produits', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
+  { name: 'Produits Agricoles & Agroalimentaires', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
   { name: 'Entreprises', slug: '/services', icon: Building2, color: 'from-purple-500/20 to-purple-500/5' },
   { name: 'Hôtels', slug: '/hotels', icon: Hotel, color: 'from-gold/20 to-gold/5' },
   { name: 'Tourisme', slug: '/tourism', icon: Palmtree, color: 'from-emerald-brand/20 to-emerald-brand/5' },
