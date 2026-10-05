@@ -1,4 +1,4 @@
-=import Link from 'next/link';
+import Link from 'next/link';
 import {
   ShoppingBag,
   Building2,
@@ -19,19 +19,65 @@ import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 
 const APP_NAME = 'Kpalimé-Trade';
 
-// 8 catégories (Fournisseurs retiré)
 const CATEGORIES = [
-  { name: 'Produits agricoles & agroalimentaires', slug: '/marketplace', icon: ShoppingBag, color: 'from-emerald-brand/20 to-emerald-brand/5' },
-  { name: 'Entreprises', slug: '/services', icon: Building2, color: 'from-purple-500/20 to-purple-500/5' },
-  { name: 'Hôtels', slug: '/hotels', icon: Hotel, color: 'from-gold/20 to-gold/5' },
-  { name: 'Tourisme', slug: '/tourism', icon: Palmtree, color: 'from-emerald-brand/20 to-emerald-brand/5' },
-  { name: 'Restaurants', slug: '/restaurants', icon: UtensilsCrossed, color: 'from-orange-500/20 to-orange-500/5' },
-  { name: 'Services', slug: '/services', icon: Wrench, color: 'from-cyan-500/20 to-cyan-500/5' },
-  { name: 'Événements', slug: '/events', icon: CalendarDays, color: 'from-pink-500/20 to-pink-500/5' },
-  { name: 'Cultures', slug: '/culture', icon: Palette, color: 'from-gold/20 to-gold/5' },
+  {
+    name: 'Produits Agricoles & Agroalimentaires',
+    slug: '/marketplace',
+    icon: ShoppingBag,
+    color: 'from-emerald-brand/20 to-emerald-brand/5',
+    labelSize: 'text-xs sm:text-sm',
+  },
+  {
+    name: 'Entreprises',
+    slug: '/services',
+    icon: Building2,
+    color: 'from-purple-500/20 to-purple-500/5',
+    labelSize: 'text-sm md:text-base',
+  },
+  {
+    name: 'Hôtels',
+    slug: '/hotels',
+    icon: Hotel,
+    color: 'from-gold/20 to-gold/5',
+    labelSize: 'text-sm md:text-base',
+  },
+  {
+    name: 'Tourisme',
+    slug: '/tourism',
+    icon: Palmtree,
+    color: 'from-emerald-brand/20 to-emerald-brand/5',
+    labelSize: 'text-sm md:text-base',
+  },
+  {
+    name: 'Restaurants',
+    slug: '/restaurants',
+    icon: UtensilsCrossed,
+    color: 'from-orange-500/20 to-orange-500/5',
+    labelSize: 'text-sm md:text-base',
+  },
+  {
+    name: 'Services',
+    slug: '/services',
+    icon: Wrench,
+    color: 'from-cyan-500/20 to-cyan-500/5',
+    labelSize: 'text-sm md:text-base',
+  },
+  {
+    name: 'Événements',
+    slug: '/events',
+    icon: CalendarDays,
+    color: 'from-pink-500/20 to-pink-500/5',
+    labelSize: 'text-sm md:text-base',
+  },
+  {
+    name: 'Cultures',
+    slug: '/culture',
+    icon: Palette,
+    color: 'from-gold/20 to-gold/5',
+    labelSize: 'text-sm md:text-base',
+  },
 ];
 
-// Section "Pourquoi choisir"
 const FEATURES = [
   {
     icon: Globe,
@@ -57,35 +103,29 @@ export default function HomePage() {
           1. HERO SECTION
       ============================================ */}
       <section className="relative overflow-hidden">
-        {/* Halos décoratifs */}
         <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-emerald-brand/10 blur-3xl" />
         <div className="pointer-events-none absolute top-20 -left-40 w-96 h-96 rounded-full bg-gold/10 blur-3xl" />
         <div className="pointer-events-none absolute top-40 -right-40 w-96 h-96 rounded-full bg-emerald-brand/10 blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24 text-center">
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-gold/30 bg-gold/10 text-gold text-xs font-semibold uppercase tracking-wider mb-6">
             <Globe size={14} />
             Le Togo ouvre ses portes au monde
           </div>
 
-          {/* Titre principal */}
           <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
             {APP_NAME}
           </h1>
 
-          {/* Slogan */}
           <p className="text-2xl md:text-3xl font-light text-white/90 mb-4">
             Le Togo ouvre ses portes au monde.
           </p>
 
-          {/* Sous-titre */}
           <p className="text-base md:text-lg text-muted max-w-3xl mx-auto mb-10 leading-relaxed">
             Découvrez les produits, entreprises, services, destinations, établissements
             et richesses culturelles du Togo.
           </p>
 
-          {/* Deux gros boutons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
             <Link
               href="/marketplace"
@@ -115,7 +155,6 @@ export default function HomePage() {
       ============================================ */}
       <section className="relative py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
-          {/* Titre de section */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 text-gold text-sm font-semibold uppercase tracking-wider mb-3">
               <Search size={16} />
@@ -129,7 +168,6 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Grille de catégories (8 au lieu de 9) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
@@ -144,12 +182,11 @@ export default function HomePage() {
                     <div className="w-14 h-14 rounded-md bg-white/10 backdrop-blur flex items-center justify-center group-hover:bg-emerald-brand group-hover:scale-110 transition-all duration-300">
                       <Icon size={28} className="text-white" />
                     </div>
-                    <span className="text-white font-semibold text-sm md:text-base">
+                    <span className={`${cat.labelSize} text-white font-semibold text-center leading-tight`}>
                       {cat.name}
                     </span>
                   </div>
 
-                  {/* Effet hover lumineux */}
                   <div className="absolute inset-0 bg-emerald-brand/0 group-hover:bg-emerald-brand/10 transition-all duration-300" />
                 </Link>
               );
@@ -199,7 +236,7 @@ export default function HomePage() {
       </section>
 
       {/* ============================================
-          4. SECTION POURQUOI KPALIMÉ-TRADE (REMISE ICI)
+          4. SECTION POURQUOI KPALIMÉ-TRADE
       ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
@@ -228,6 +265,38 @@ export default function HomePage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          5. SECTION CTA VENDEUR
+      ============================================ */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="rounded-md bg-gradient-to-br from-emerald-brand/20 via-night-light to-gold/10 border border-emerald-brand/30 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-brand/20 text-emerald-brand text-xs font-semibold uppercase tracking-wider mb-3">
+                <Store size={14} />
+                Espace vendeur
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                Vendez sur Kpalimé-Trade
+              </h2>
+              <p className="text-muted max-w-xl">
+                Créez votre boutique gratuitement, publiez vos produits et touchez
+                des clients dans tout le Togo et au-delà.
+              </p>
+            </div>
+            <Link
+              href="/auth/register"
+              prefetch
+              className="touch-target inline-flex items-center gap-2 px-7 py-3.5 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all shadow-lg shadow-gold/25 shrink-0"
+            >
+              <Store size={20} />
+              Ouvrir ma boutique
+              <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
