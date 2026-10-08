@@ -14,12 +14,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 
+/* Liens principaux : toujours visibles en haut sur PC */
 const PRIMARY_LINKS = [
   { href: '/', label: 'Accueil', icon: Home },
   { href: '/marketplace', label: 'Boutique', icon: ShoppingBag },
+  { href: '/discover', label: 'Découvrir', icon: Palmtree },
   { href: '/restaurants', label: 'Restaurants', icon: UtensilsCrossed },
 ];
 
+/* Liens secondaires : dans le menu ☰ */
 const MENU_LINKS = [
   { href: '/tourism', label: 'Tourisme', icon: Palmtree },
   { href: '/hotels', label: 'Hôtels', icon: Hotel },
@@ -38,6 +41,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const accountRef = useRef<HTMLDivElement>(null);
 
+  // Fermer le menu compte quand on clique ailleurs
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
       if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
@@ -48,11 +52,13 @@ export function Header() {
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
+  // Fermer les menus au changement de page
   useEffect(() => {
     setMenuOpen(false);
     setAccountOpen(false);
   }, [pathname]);
 
+  // Gérer la recherche
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -61,6 +67,7 @@ export function Header() {
     }
   };
 
+  // Lien du tableau de bord selon le rôle
   const dashboardHref = !user
     ? '/auth/login'
     : user.role === 'admin'
@@ -72,7 +79,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-night/95 backdrop-blur border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
-        {/* Gauche : menu ☰ + logo */}
+        
+        {/* GAUCHE : Menu ☰ + Logo */}
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -92,7 +100,7 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Centre : Liens principaux + Recherche (PC) */}
+        {/* CENTRE : Liens principaux + Recherche (sur PC) */}
         <div className="hidden lg:flex items-center gap-4 flex-1 max-w-3xl">
           <nav className="flex items-center gap-1">
             {PRIMARY_LINKS.map((link) => {
@@ -115,7 +123,7 @@ export function Header() {
             })}
           </nav>
 
-          {/* Barre de recherche intégrée */}
+          {/* Barre de recherche */}
           <form onSubmit={handleSearch} className="flex-1 max-w-md relative">
             <input
               type="text"
@@ -128,8 +136,9 @@ export function Header() {
           </form>
         </div>
 
-        {/* Droite : devise, panier, compte */}
+        {/* DROITE : Devise, Panier, Compte */}
         <div className="flex items-center gap-2 shrink-0">
+          
           {/* Bouton recherche mobile */}
           <button
             onClick={() => router.push('/search')}
@@ -141,6 +150,7 @@ export function Header() {
 
           <CurrencySelector />
 
+          {/* Panier */}
           <Link
             href="/checkout"
             prefetch
@@ -155,9 +165,11 @@ export function Header() {
             )}
           </Link>
 
+          {/* Zone authentification */}
           {!isLoading && (
             <>
               {user ? (
+                /* Utilisateur connecté : menu déroulant */
                 <div className="relative" ref={accountRef}>
                   <button
                     onClick={() => setAccountOpen(!accountOpen)}
@@ -197,6 +209,7 @@ export function Header() {
                   )}
                 </div>
               ) : (
+                /* Utilisateur non connecté : boutons Connexion / Inscription */
                 <>
                   <Link href="/auth/login" prefetch className="hidden sm:inline-flex touch-target items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted hover:bg-white/10 hover:text-white transition-colors">
                     <LogIn size={20} /> <span>Connexion</span>
@@ -211,7 +224,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Menu ☰ déroulant */}
+      {/* MENU ☰ DÉROULANT (liens secondaires) */}
       {menuOpen && (
         <div className="absolute top-full left-0 right-0 bg-night-light border-b border-white/10 shadow-2xl animate-slide-up">
           <nav className="max-w-7xl mx-auto px-4 py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
@@ -226,6 +239,8 @@ export function Header() {
               );
             })}
           </nav>
+
+          {/* Liens principaux sur mobile (dans le menu) */}
           <nav className="lg:hidden max-w-7xl mx-auto px-4 pb-4 grid grid-cols-1 gap-2 border-t border-white/10 pt-3">
              {PRIMARY_LINKS.map((link) => {
               const Icon = link.icon;
