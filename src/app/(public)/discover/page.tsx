@@ -22,10 +22,6 @@ export const metadata = {
 
 /**
  * Les 8 grandes rubriques du Pôle 2 — Découvrir le Togo
- *
- * Chaque rubrique a son icône, sa couleur et sa description.
- * Les liens pointent vers les pages dédiées (certaines existent déjà,
- * d'autres seront créées progressivement).
  */
 const DISCOVER_SECTIONS = [
   {
@@ -74,7 +70,7 @@ const DISCOVER_SECTIONS = [
     description:
       'Découvrir les artistes, artisans, savoir-faire et créations du Togo.',
     icon: Palette,
-    href: '/culture', // temporairement vers /culture, page dédiée à créer
+    href: '/culture',
     color: 'from-pink-500/20 to-pink-500/5',
     accent: 'text-pink-400',
   },
@@ -84,7 +80,7 @@ const DISCOVER_SECTIONS = [
     description:
       'Découvrir les artistes, musiciens, spectacles et activités culturelles.',
     icon: Music,
-    href: '/events', // temporairement vers /events, page dédiée à créer
+    href: '/events',
     color: 'from-fuchsia-500/20 to-fuchsia-500/5',
     accent: 'text-fuchsia-400',
   },
@@ -104,24 +100,21 @@ const DISCOVER_SECTIONS = [
     description:
       'Découvrir les activités, excursions, visites et expériences proposées aux visiteurs.',
     icon: Compass,
-    href: '/tourism', // temporairement vers /tourism, page dédiée à créer
+    href: '/tourism',
     color: 'from-amber-500/20 to-amber-500/5',
     accent: 'text-amber-400',
   },
 ];
 
 /**
- * Destinations mises en avant (exemples — à enrichir progressivement)
- *
- * Ces éléments ne sont PAS des données inventées :
- * ce sont des régions réelles du Togo, présentées comme des portes d'entrée.
+ * Les 5 régions économiques du Togo
  */
 const FEATURED_DESTINATIONS = [
-  { name: 'Kpalimé', region: 'Région des Plateaux', icon: MapPin },
-  { name: 'Lomé', region: 'Capitale', icon: MapPin },
-  { name: 'Kara', region: 'Région de la Kara', icon: MapPin },
-  { name: 'Atakpamé', region: 'Région des Plateaux', icon: MapPin },
-  { name: 'Aného', region: 'Région Maritime', icon: MapPin },
+  { name: 'Maritime', region: 'Chef-lieu : Lomé', icon: MapPin },
+  { name: 'Plateaux', region: 'Chef-lieu : Atakpamé', icon: MapPin },
+  { name: 'Centrale', region: 'Chef-lieu : Sokodé', icon: MapPin },
+  { name: 'Kara', region: 'Chef-lieu : Kara', icon: MapPin },
+  { name: 'Savanes', region: 'Chef-lieu : Dapaong', icon: MapPin },
 ];
 
 export default function DiscoverTogoPage() {
@@ -241,16 +234,16 @@ export default function DiscoverTogoPage() {
       </section>
 
       {/* ============================================
-          3. DESTINATIONS MISES EN AVANT
+          3. LES 5 RÉGIONS DU TOGO
       ============================================ */}
       <section className="py-16 md:py-20 bg-night-light/30 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Destinations à découvrir
+              Les 5 régions du Togo
             </h2>
             <p className="text-muted max-w-2xl mx-auto">
-              Quelques portes d'entrée vers les richesses du Togo
+              Découvrez les richesses de chaque région économique du pays
             </p>
           </div>
 
