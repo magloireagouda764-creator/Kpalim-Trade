@@ -12,12 +12,39 @@ import {
   ArrowRight,
   MapPin,
   Sparkles,
+  PawPrint,
+  Mountain,
+  Droplets,
+  Home,
+  Image as ImageIcon,
+  type LucideIcon,
 } from 'lucide-react';
+import { TOGO_REGIONS } from '@/lib/togo-regions';
 
 export const metadata = {
   title: 'Découvrir le Togo | Kpalimé-Trade',
   description:
     'Explorez les destinations, les cultures, les traditions, les saveurs, les arts et les expériences qui font la richesse du Togo.',
+};
+
+/**
+ * Mapping des noms d'icônes vers les composants Lucide
+ */
+const ICON_MAP: Record<string, LucideIcon> = {
+  MapPin,
+  Hotel,
+  UtensilsCrossed,
+  Palette,
+  Compass,
+  CalendarDays,
+  Hiking: Compass,
+  Droplets,
+  Hammer: Palette,
+  PawPrint,
+  Landmark,
+  Home,
+  Mountain,
+  Image: ImageIcon,
 };
 
 /**
@@ -27,8 +54,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'destinations',
     name: 'Destinations & Tourisme',
-    description:
-      'Découvrir les différentes destinations et lieux touristiques du Togo.',
+    description: 'Découvrir les différentes destinations et lieux touristiques du Togo.',
     icon: Map,
     href: '/tourism',
     color: 'from-emerald-brand/20 to-emerald-brand/5',
@@ -37,8 +63,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'hotels',
     name: 'Hôtels & Hébergements',
-    description:
-      'Trouver des hôtels, hébergements et établissements pour votre séjour.',
+    description: 'Trouver des hôtels, hébergements et établissements pour votre séjour.',
     icon: Hotel,
     href: '/hotels',
     color: 'from-gold/20 to-gold/5',
@@ -47,8 +72,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'restaurants',
     name: 'Restaurants & Gastronomie',
-    description:
-      'Découvrir les restaurants, la cuisine et les spécialités locales.',
+    description: 'Découvrir les restaurants, la cuisine et les spécialités locales.',
     icon: UtensilsCrossed,
     href: '/restaurants',
     color: 'from-orange-500/20 to-orange-500/5',
@@ -57,8 +81,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'culture',
     name: 'Culture & Patrimoine',
-    description:
-      "Découvrir l'histoire, les traditions, le patrimoine et la diversité culturelle.",
+    description: "Découvrir l'histoire, les traditions, le patrimoine et la diversité culturelle.",
     icon: Landmark,
     href: '/culture',
     color: 'from-purple-500/20 to-purple-500/5',
@@ -67,8 +90,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'arts-artisanat',
     name: 'Arts & Artisanat',
-    description:
-      'Découvrir les artistes, artisans, savoir-faire et créations du Togo.',
+    description: 'Découvrir les artistes, artisans, savoir-faire et créations du Togo.',
     icon: Palette,
     href: '/culture',
     color: 'from-pink-500/20 to-pink-500/5',
@@ -77,8 +99,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'musique',
     name: 'Musique & Divertissement',
-    description:
-      'Découvrir les artistes, musiciens, spectacles et activités culturelles.',
+    description: 'Découvrir les artistes, musiciens, spectacles et activités culturelles.',
     icon: Music,
     href: '/events',
     color: 'from-fuchsia-500/20 to-fuchsia-500/5',
@@ -87,8 +108,7 @@ const DISCOVER_SECTIONS = [
   {
     id: 'evenements',
     name: 'Événements',
-    description:
-      'Découvrir les événements, festivals, manifestations et rendez-vous au Togo.',
+    description: 'Découvrir les événements, festivals, manifestations et rendez-vous au Togo.',
     icon: CalendarDays,
     href: '/events',
     color: 'from-cyan-500/20 to-cyan-500/5',
@@ -97,24 +117,12 @@ const DISCOVER_SECTIONS = [
   {
     id: 'experiences',
     name: 'Expériences & Activités',
-    description:
-      'Découvrir les activités, excursions, visites et expériences proposées aux visiteurs.',
+    description: 'Découvrir les activités, excursions, visites et expériences proposées aux visiteurs.',
     icon: Compass,
     href: '/tourism',
     color: 'from-amber-500/20 to-amber-500/5',
     accent: 'text-amber-400',
   },
-];
-
-/**
- * Les 5 régions économiques du Togo
- */
-const FEATURED_DESTINATIONS = [
-  { name: 'Maritime', region: 'Chef-lieu : Lomé', icon: MapPin },
-  { name: 'Plateaux', region: 'Chef-lieu : Atakpamé', icon: MapPin },
-  { name: 'Centrale', region: 'Chef-lieu : Sokodé', icon: MapPin },
-  { name: 'Kara', region: 'Chef-lieu : Kara', icon: MapPin },
-  { name: 'Savanes', region: 'Chef-lieu : Dapaong', icon: MapPin },
 ];
 
 export default function DiscoverTogoPage() {
@@ -150,70 +158,82 @@ export default function DiscoverTogoPage() {
       </section>
 
       {/* ============================================
-          2. LES 5 RÉGIONS DU TOGO
+          2. LES 5 RÉGIONS DU TOGO — Cartes détaillées
       ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
               Les 5 régions du Togo
             </h2>
             <p className="text-muted max-w-2xl mx-auto">
-              Découvrez les richesses de chaque région économique du pays
+              Chaque région offre des richesses uniques à découvrir
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {FEATURED_DESTINATIONS.map((dest) => {
-              const Icon = dest.icon;
-              return (
-                <Link
-                  key={dest.name}
-                  href="/tourism"
-                  prefetch
-                  className="flex flex-col items-center gap-3 p-5 rounded-md bg-night border border-white/10 hover:border-gold hover:-translate-y-1 transition-all touch-target"
-                >
-                  <Icon size={24} className="text-gold" />
-                  <div className="text-center">
-                    <p className="text-white font-semibold text-sm">{dest.name}</p>
-                    <p className="text-muted text-xs mt-0.5">{dest.region}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {TOGO_REGIONS.map((region) => (
+              <div
+                key={region.id}
+                className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-night-light to-night p-6 hover:border-gold/50 transition-all"
+              >
+                {/* En-tête de la carte */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="text-4xl">{region.emoji}</div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {region.name}
+                    </h3>
+                    <p className="text-sm text-gold font-medium">
+                      Chef-lieu : {region.chefLieu}
+                    </p>
                   </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-muted text-sm leading-relaxed mb-5">
+                  {region.description}
+                </p>
+
+                {/* Sous-catégories avec icônes */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
+                  {region.subCategories.map((sub) => {
+                    const IconComponent = ICON_MAP[sub.icon] || MapPin;
+                    return (
+                      <div
+                        key={sub.id}
+                        className="flex items-center gap-2 px-3 py-2 rounded-md bg-white/5 border border-white/5"
+                      >
+                        <IconComponent size={16} className="text-emerald-brand shrink-0" />
+                        <span className="text-xs text-white font-medium truncate">
+                          {sub.name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Bouton Explorer */}
+                <Link
+                  href={`/discover/regions/${region.slug}`}
+                  prefetch
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-brand text-white text-sm font-semibold hover:bg-emerald-light transition-all"
+                >
+                  Explorer cette région
+                  <ArrowRight size={16} />
                 </Link>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ============================================
-          3. UNE RICHESSE INFINIE À EXPLORER
+          3. BARRE DE RECHERCHE
       ============================================ */}
-      <section className="py-8 md:py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="rounded-md bg-gradient-to-br from-gold/10 via-night-light to-emerald-brand/10 border border-gold/30 p-8 md:p-12 text-center">
-            <Sparkles size={40} className="text-gold mx-auto mb-4" />
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Une richesse infinie à explorer
-            </h2>
-            <p className="text-muted max-w-2xl mx-auto leading-relaxed">
-              Du littoral aux montagnes, des marchés traditionnels aux festivals
-              contemporains, le Togo offre une diversité culturelle et naturelle
-              unique. Kpalimé-Trade vous accompagne dans cette découverte.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================
-          4. BARRE DE RECHERCHE
-      ============================================ */}
-      <section className="py-8 md:py-12">
+      <section className="py-8 md:py-12 bg-night-light/30 border-y border-white/5">
         <div className="max-w-3xl mx-auto px-4">
-          <form
-            action="/search"
-            method="GET"
-            className="flex gap-2"
-          >
+          <form action="/search" method="GET" className="flex gap-2">
             <div className="relative flex-1">
               <Search
                 size={20}
@@ -223,7 +243,7 @@ export default function DiscoverTogoPage() {
                 type="text"
                 name="q"
                 placeholder="Que souhaitez-vous découvrir au Togo ?"
-                className="w-full pl-12 pr-4 py-4 rounded-md bg-night-light border border-white/10 text-white placeholder-muted text-base focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold transition-all"
+                className="w-full pl-12 pr-4 py-4 rounded-md bg-night border border-white/10 text-white placeholder-muted text-base focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold transition-all"
               />
             </div>
             <button
@@ -237,7 +257,7 @@ export default function DiscoverTogoPage() {
       </section>
 
       {/* ============================================
-          5. LES 8 GRANDES RUBRIQUES — Explorez le Togo
+          4. LES 8 GRANDES RUBRIQUES — Explorez le Togo
       ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
@@ -261,9 +281,7 @@ export default function DiscoverTogoPage() {
                   className={`group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br ${section.color} p-6 hover:border-gold/50 hover:-translate-y-1 transition-all duration-300 touch-target`}
                 >
                   <div className="relative z-10 flex flex-col items-start gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-md bg-white/10 backdrop-blur flex items-center justify-center group-hover:scale-110 transition-all duration-300`}
-                    >
+                    <div className="w-12 h-12 rounded-md bg-white/10 backdrop-blur flex items-center justify-center group-hover:scale-110 transition-all duration-300">
                       <Icon size={24} className={section.accent} />
                     </div>
                     <div>
@@ -274,20 +292,51 @@ export default function DiscoverTogoPage() {
                         {section.description}
                       </p>
                     </div>
-                    <div
-                      className={`flex items-center gap-1 ${section.accent} text-xs font-semibold mt-auto`}
-                    >
+                    <div className={`flex items-center gap-1 ${section.accent} text-xs font-semibold mt-auto`}>
                       <span>Explorer</span>
-                      <ArrowRight
-                        size={12}
-                        className="group-hover:translate-x-1 transition-transform"
-                      />
+                      <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
                   <div className="absolute inset-0 bg-gold/0 group-hover:bg-gold/5 transition-all duration-300" />
                 </Link>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          5. INVITATION FINALE
+      ============================================ */}
+      <section className="py-16 md:py-20 bg-night-light/30 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="rounded-md bg-gradient-to-br from-gold/10 via-night-light to-emerald-brand/10 border border-gold/30 p-8 md:p-12 text-center">
+            <Sparkles size={40} className="text-gold mx-auto mb-4" />
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Une richesse infinie à explorer
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto mb-6 leading-relaxed">
+              Du littoral aux montagnes, des marchés traditionnels aux festivals
+              contemporains, le Togo offre une diversité culturelle et naturelle
+              unique. Kpalimé-Trade vous accompagne dans cette découverte.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/tourism"
+                prefetch
+                className="touch-target inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
+              >
+                <Map size={18} />
+                Commencer l'exploration
+              </Link>
+              <Link
+                href="/"
+                prefetch
+                className="touch-target inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-white/10 text-white font-semibold hover:bg-white/20 border border-white/20 transition-all"
+              >
+                Retour à l'accueil
+              </Link>
+            </div>
           </div>
         </div>
       </section>
