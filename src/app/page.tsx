@@ -30,7 +30,7 @@ const APP_NAME = 'Kpalimé-Trade';
 
 // Accès rapides "Que recherchez-vous ?"
 const QUICK_LINKS = [
-  { name: 'Produits agricoles & alimentaires', href: '/marketplace', icon: Wheat, color: 'from-emerald-brand/20 to-emerald-brand/5' },
+  { name: 'Produits agricoles', href: '/marketplace', icon: Wheat, color: 'from-emerald-brand/20 to-emerald-brand/5' },
   { name: 'Entreprises', href: '/services', icon: Building2, color: 'from-blue-500/20 to-blue-500/5' },
   { name: 'Hôtels', href: '/hotels', icon: Hotel, color: 'from-gold/20 to-gold/5' },
   { name: 'Restaurants', href: '/restaurants', icon: UtensilsCrossed, color: 'from-orange-500/20 to-orange-500/5' },
@@ -47,7 +47,7 @@ const TOGO_PRODUCTS = [
   { name: 'Coton', icon: Shirt, slug: '/marketplace' },
   { name: 'Artisanat', icon: Palette, slug: '/marketplace' },
   { name: 'Textile', icon: Shirt, slug: '/marketplace' },
-  { name: 'Produits agricoles & alimentaires', icon: Wheat, slug: '/marketplace' },
+  { name: 'Produits agricoles', icon: Wheat, slug: '/marketplace' },
 ];
 
 export default function HomePage() {
@@ -402,4 +402,5 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  )}
+  );
+}
