@@ -116,7 +116,7 @@ export default function HomePage() {
               Explorer les produits
             </Link>
             <Link
-              href="/tourism"
+              href="//discover"
               prefetch
               className="touch-target flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all"
             >
@@ -181,7 +181,7 @@ export default function HomePage() {
                   Explorez les destinations, la culture, le tourisme, les arts, l'artisanat et les expériences du Togo.
                 </p>
                 <Link
-                  href="/tourism"
+                  href="//discover"
                   prefetch
                   className="inline-flex items-center gap-2 text-gold font-semibold hover:gap-3 transition-all"
                 >
@@ -402,5 +402,4 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-  );
-}
+  )
