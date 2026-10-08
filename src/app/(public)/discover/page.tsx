@@ -146,39 +146,98 @@ export default function DiscoverTogoPage() {
             Explorez les destinations, les cultures, les traditions, les saveurs,
             les arts et les expériences qui font la richesse du Togo.
           </p>
+        </div>
+      </section>
 
-          {/* Barre de recherche */}
-          <div className="max-w-3xl mx-auto">
-            <form
-              action="/search"
-              method="GET"
-              className="flex gap-2"
-            >
-              <div className="relative flex-1">
-                <Search
-                  size={20}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-                />
-                <input
-                  type="text"
-                  name="q"
-                  placeholder="Que souhaitez-vous découvrir au Togo ?"
-                  className="w-full pl-12 pr-4 py-4 rounded-md bg-night-light border border-white/10 text-white placeholder-muted text-base focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold transition-all"
-                />
-              </div>
-              <button
-                type="submit"
-                className="touch-target px-6 py-4 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all shadow-lg shadow-gold/30"
-              >
-                <Search size={20} />
-              </button>
-            </form>
+      {/* ============================================
+          2. LES 5 RÉGIONS DU TOGO
+      ============================================ */}
+      <section className="py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Les 5 régions du Togo
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Découvrez les richesses de chaque région économique du pays
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {FEATURED_DESTINATIONS.map((dest) => {
+              const Icon = dest.icon;
+              return (
+                <Link
+                  key={dest.name}
+                  href="/tourism"
+                  prefetch
+                  className="flex flex-col items-center gap-3 p-5 rounded-md bg-night border border-white/10 hover:border-gold hover:-translate-y-1 transition-all touch-target"
+                >
+                  <Icon size={24} className="text-gold" />
+                  <div className="text-center">
+                    <p className="text-white font-semibold text-sm">{dest.name}</p>
+                    <p className="text-muted text-xs mt-0.5">{dest.region}</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ============================================
-          2. LES 8 GRANDES RUBRIQUES
+          3. UNE RICHESSE INFINIE À EXPLORER
+      ============================================ */}
+      <section className="py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="rounded-md bg-gradient-to-br from-gold/10 via-night-light to-emerald-brand/10 border border-gold/30 p-8 md:p-12 text-center">
+            <Sparkles size={40} className="text-gold mx-auto mb-4" />
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Une richesse infinie à explorer
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto leading-relaxed">
+              Du littoral aux montagnes, des marchés traditionnels aux festivals
+              contemporains, le Togo offre une diversité culturelle et naturelle
+              unique. Kpalimé-Trade vous accompagne dans cette découverte.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          4. BARRE DE RECHERCHE
+      ============================================ */}
+      <section className="py-8 md:py-12">
+        <div className="max-w-3xl mx-auto px-4">
+          <form
+            action="/search"
+            method="GET"
+            className="flex gap-2"
+          >
+            <div className="relative flex-1">
+              <Search
+                size={20}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+              />
+              <input
+                type="text"
+                name="q"
+                placeholder="Que souhaitez-vous découvrir au Togo ?"
+                className="w-full pl-12 pr-4 py-4 rounded-md bg-night-light border border-white/10 text-white placeholder-muted text-base focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold transition-all"
+              />
+            </div>
+            <button
+              type="submit"
+              className="touch-target px-6 py-4 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all shadow-lg shadow-gold/30"
+            >
+              <Search size={20} />
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* ============================================
+          5. LES 8 GRANDES RUBRIQUES — Explorez le Togo
       ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
@@ -229,89 +288,6 @@ export default function DiscoverTogoPage() {
                 </Link>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================
-          3. LES 5 RÉGIONS DU TOGO
-      ============================================ */}
-      <section className="py-16 md:py-20 bg-night-light/30 border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Les 5 régions du Togo
-            </h2>
-            <p className="text-muted max-w-2xl mx-auto">
-              Découvrez les richesses de chaque région économique du pays
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {FEATURED_DESTINATIONS.map((dest) => {
-              const Icon = dest.icon;
-              return (
-                <Link
-                  key={dest.name}
-                  href="/tourism"
-                  prefetch
-                  className="flex flex-col items-center gap-3 p-5 rounded-md bg-night border border-white/10 hover:border-gold hover:-translate-y-1 transition-all touch-target"
-                >
-                  <Icon size={24} className="text-gold" />
-                  <div className="text-center">
-                    <p className="text-white font-semibold text-sm">{dest.name}</p>
-                    <p className="text-muted text-xs mt-0.5">{dest.region}</p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link
-              href="/tourism"
-              prefetch
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-gold text-night font-semibold hover:bg-gold-light transition-all"
-            >
-              Voir toutes les destinations
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================
-          4. INVITATION À EXPLORER DAVANTAGE
-      ============================================ */}
-      <section className="py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="rounded-md bg-gradient-to-br from-gold/10 via-night-light to-emerald-brand/10 border border-gold/30 p-8 md:p-12 text-center">
-            <Sparkles size={40} className="text-gold mx-auto mb-4" />
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Une richesse infinie à explorer
-            </h2>
-            <p className="text-muted max-w-2xl mx-auto mb-6 leading-relaxed">
-              Du littoral aux montagnes, des marchés traditionnels aux festivals
-              contemporains, le Togo offre une diversité culturelle et naturelle
-              unique. Kpalimé-Trade vous accompagne dans cette découverte.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="/tourism"
-                prefetch
-                className="touch-target inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
-              >
-                <Map size={18} />
-                Commencer l'exploration
-              </Link>
-              <Link
-                href="/"
-                prefetch
-                className="touch-target inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-white/10 text-white font-semibold hover:bg-white/20 border border-white/20 transition-all"
-              >
-                Retour à l'accueil
-              </Link>
-            </div>
           </div>
         </div>
       </section>
