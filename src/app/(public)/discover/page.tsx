@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Map,
   Hotel,
@@ -12,11 +13,7 @@ import {
   ArrowRight,
   MapPin,
   Sparkles,
-  PawPrint,
-  Mountain,
-  Droplets,
-  Home,
-  Image as ImageIcon,
+  TreePine,
   type LucideIcon,
 } from 'lucide-react';
 import { TOGO_REGIONS } from '@/lib/togo-regions';
@@ -35,15 +32,19 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Compass,
   CalendarDays,
   Hiking: Compass,
-  Droplets,
+  Droplets: MapPin,
   Hammer: Palette,
-  PawPrint,
+  PawPrint: MapPin,
   Landmark,
-  Home,
-  Mountain,
-  Image: ImageIcon,
+  Home: MapPin,
+  Mountain: MapPin,
+  Image: MapPin,
 };
 
+/**
+ * Les 9 grandes rubriques du Pôle 2 — Découvrir le Togo
+ * (ajout de "La végétation" comme 9ème porte)
+ */
 const DISCOVER_SECTIONS = [
   {
     id: 'destinations',
@@ -117,11 +118,49 @@ const DISCOVER_SECTIONS = [
     color: 'from-amber-500/20 to-amber-500/5',
     accent: 'text-amber-400',
   },
+  {
+    id: 'vegetation',
+    name: 'La végétation',
+    description: 'Découvrir la flore, les forêts, les parcs naturels et la biodiversité du Togo.',
+    icon: TreePine,
+    href: '/tourism',
+    color: 'from-green-600/20 to-green-600/5',
+    accent: 'text-green-400',
+  },
+];
+
+/**
+ * Les 4 images à afficher entre le Hero et les 5 régions
+ */
+const SHOWCASE_IMAGES = [
+  {
+    src: '/images/discover/monuments/carte-togo-regions.jpg',
+    alt: 'Carte administrative du Togo montrant les 5 régions économiques',
+    caption: 'Les 5 régions du Togo',
+  },
+  {
+    src: '/images/discover/monuments/colonne-paix-lions.jpg',
+    alt: 'Monument de la Colonne de la Paix à Lomé avec les deux lions blancs',
+    caption: 'Colonne de la Paix — Lomé',
+  },
+  {
+    src: '/images/discover/monuments/drapeau-togolais-affiche.jpg',
+    alt: 'Affiche éducative du drapeau togolais',
+    caption: 'Le drapeau togolais',
+  },
+  {
+    src: '/images/discover/monuments/monuments-colonne-paix.jpg',
+    alt: 'Affiche éducative sur les monuments du Togo',
+    caption: 'Monuments du Togo',
+  },
 ];
 
 export default function DiscoverTogoPage() {
   return (
     <div className="bg-night min-h-screen">
+      {/* ============================================
+          1. HERO — Présentation forte du Pôle 2
+      ============================================ */}
       <section className="relative overflow-hidden border-b border-white/10">
         <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-gold/10 blur-3xl" />
         <div className="pointer-events-none absolute top-20 -left-40 w-96 h-96 rounded-full bg-emerald-brand/10 blur-3xl" />
@@ -144,6 +183,47 @@ export default function DiscoverTogoPage() {
         </div>
       </section>
 
+      {/* ============================================
+          2. GALERIE VISUELLE — 4 images du Togo
+      ============================================ */}
+      <section className="py-12 md:py-16 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              Symboles et richesses du Togo
+            </h2>
+            <p className="text-muted max-w-2xl mx-auto">
+              Quelques repères visuels pour commencer votre découverte
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {SHOWCASE_IMAGES.map((img, index) => (
+              <div
+                key={index}
+                className="group relative overflow-hidden rounded-md border border-white/10 bg-night-light"
+              >
+                <div className="relative aspect-[4/3] w-full overflow-hidden">
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  />
+                </div>
+                <div className="p-3 text-center">
+                  <p className="text-white text-sm font-medium">{img.caption}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          3. LES 5 RÉGIONS DU TOGO — Cartes détaillées
+      ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
@@ -208,6 +288,9 @@ export default function DiscoverTogoPage() {
         </div>
       </section>
 
+      {/* ============================================
+          4. BARRE DE RECHERCHE
+      ============================================ */}
       <section className="py-8 md:py-12 bg-night-light/30 border-y border-white/5">
         <div className="max-w-3xl mx-auto px-4">
           <form action="/search" method="GET" className="flex gap-2">
@@ -233,6 +316,9 @@ export default function DiscoverTogoPage() {
         </div>
       </section>
 
+      {/* ============================================
+          5. LES 9 GRANDES RUBRIQUES — Explorez le Togo
+      ============================================ */}
       <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
@@ -240,11 +326,11 @@ export default function DiscoverTogoPage() {
               Explorez le Togo
             </h2>
             <p className="text-muted max-w-2xl mx-auto">
-              Huit grandes portes d'entrée pour découvrir toutes les richesses du pays
+              Neuf grandes portes d'entrée pour découvrir toutes les richesses du pays
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {DISCOVER_SECTIONS.map((section) => {
               const Icon = section.icon;
               return (
@@ -279,6 +365,9 @@ export default function DiscoverTogoPage() {
         </div>
       </section>
 
+      {/* ============================================
+          6. INVITATION FINALE
+      ============================================ */}
       <section className="py-16 md:py-20 bg-night-light/30 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="rounded-md bg-gradient-to-br from-gold/10 via-night-light to-emerald-brand/10 border border-gold/30 p-8 md:p-12 text-center">
