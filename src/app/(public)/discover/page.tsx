@@ -129,7 +129,7 @@ const DISCOVER_SECTIONS = [
 ];
 
 /**
- * Les 4 images à afficher entre le Hero et les 5 régions
+ * Les 5 images à afficher entre le Hero et les 5 régions
  */
 const SHOWCASE_IMAGES = [
   {
@@ -154,7 +154,7 @@ const SHOWCASE_IMAGES = [
   },
   {
     src: '/images/discover/monuments/monument-independance.jpg',
-    alt: 'Monument de l\'Indépendance du Togo à Lomé, commémorant le 27 avril 1960',
+    alt: 'Monument de l\'Indépendance du Togo à Lomé',
     caption: 'Monument de l\'Indépendance — Lomé',
   },
 ];
@@ -188,7 +188,7 @@ export default function DiscoverTogoPage() {
       </section>
 
       {/* ============================================
-          2. GALERIE VISUELLE — 4 images du Togo
+          2. GALERIE VISUELLE — 5 images du Togo
       ============================================ */}
       <section className="py-12 md:py-16 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4">
@@ -201,7 +201,7 @@ export default function DiscoverTogoPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {SHOWCASE_IMAGES.map((img, index) => (
               <div
                 key={index}
@@ -213,7 +213,7 @@ export default function DiscoverTogoPage() {
                     alt={img.alt}
                     fill
                     className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                   />
                 </div>
                 <div className="p-3 text-center bg-night-light">
