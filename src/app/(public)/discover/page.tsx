@@ -152,6 +152,11 @@ const SHOWCASE_IMAGES = [
     alt: 'Affiche éducative sur les monuments du Togo',
     caption: 'Monuments du Togo',
   },
+  {
+    src: '/images/discover/monuments/monument-independance.jpg',
+    alt: 'Monument de l\'Indépendance du Togo à Lomé, commémorant le 27 avril 1960',
+    caption: 'Monument de l\'Indépendance — Lomé',
+  },
 ];
 
 export default function DiscoverTogoPage() {
