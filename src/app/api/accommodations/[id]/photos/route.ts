@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { Accommodation } from '@/models/Accommodation';
 import { uploadImage, deleteImage } from '@/services/cloudinary.service';
-import { UPLOAD_LIMITS } from '@/lib/config';
+
+// Nombre maximum de photos par établissement
+const MAX_IMAGES = 20;
 
 async function connectDB() {
   if (mongoose.connections[0].readyState) return;
@@ -38,9 +40,9 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Image manquante' }, { status: 400 });
     }
 
-    if (accommodation.images.length >= UPLOAD_LIMITS.maxImagesPerAccommodation) {
+    if (accommodation.images.length >= MAX_IMAGES) {
       return NextResponse.json(
-        { success: false, error: `Nombre maximum de photos atteint (${UPLOAD_LIMITS.maxImagesPerAccommodation})` },
+        { success: false, error: `Nombre maximum de photos atteint (${MAX_IMAGES})` },
         { status: 400 }
       );
     }
@@ -54,17 +56,19 @@ export async function POST(
       return NextResponse.json({ success: false, error: uploadResult.error }, { status: 400 });
     }
 
-    accommodation.images.push({
+    // Construire l'objet image manuellement avec les bons champs
+    const newImage = {
       public_id: uploadResult.data!.public_id,
       secure_url: uploadResult.data!.secure_url,
       category: category || 'autre',
       uploadedAt: new Date(),
-    });
+    };
 
+    accommodation.images.push(newImage);
     await accommodation.save();
 
     return NextResponse.json(
-      { success: true, message: 'Photo uploadée avec succès', data: uploadResult.data },
+      { success: true, message: 'Photo uploadée avec succès', data: newImage },
       { status: 201 }
     );
   } catch (error: any) {
