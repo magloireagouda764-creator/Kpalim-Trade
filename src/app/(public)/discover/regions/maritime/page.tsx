@@ -9,6 +9,7 @@ import {
   UtensilsCrossed,
   Compass,
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
   type LucideIcon,
 } from 'lucide-react';
@@ -34,9 +35,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 export default function MaritimeRegionPage() {
   return (
     <div className="bg-night min-h-screen">
-      {/* ============================================
-          1. BANNIÈRE HERO
-      ============================================ */}
+      {/* BANNIÈRE HERO */}
       <section className="relative h-[500px] md:h-[600px] overflow-hidden">
         <Image
           src={MARITIME_REGION.banner}
@@ -66,9 +65,7 @@ export default function MaritimeRegionPage() {
         </div>
       </section>
 
-      {/* ============================================
-          2. PRÉSENTATION GÉNÉRALE
-      ============================================ */}
+      {/* PRÉSENTATION GÉNÉRALE */}
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl">
@@ -82,9 +79,7 @@ export default function MaritimeRegionPage() {
         </div>
       </section>
 
-      {/* ============================================
-          3. SECTIONS THÉMATIQUES
-      ============================================ */}
+      {/* SECTIONS THÉMATIQUES */}
       <section className="py-12 md:py-16 bg-night-light/30 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -116,6 +111,14 @@ export default function MaritimeRegionPage() {
                         </li>
                       ))}
                     </ul>
+                  ) : section.link ? (
+                    <Link 
+                      href={section.link}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-brand text-white text-sm font-semibold hover:bg-emerald-light transition-all"
+                    >
+                      Voir les établissements
+                      <ArrowRight size={16} />
+                    </Link>
                   ) : (
                     <p className="text-muted text-sm italic">
                       {section.note || 'Contenu en cours de préparation'}
@@ -128,9 +131,7 @@ export default function MaritimeRegionPage() {
         </div>
       </section>
 
-      {/* ============================================
-          4. GALERIE PHOTOS
-      ============================================ */}
+      {/* GALERIE PHOTOS */}
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
@@ -155,9 +156,7 @@ export default function MaritimeRegionPage() {
         </div>
       </section>
 
-      {/* ============================================
-          5. INFORMATIONS PRATIQUES
-      ============================================ */}
+      {/* INFORMATIONS PRATIQUES */}
       <section className="py-12 md:py-16 bg-night-light/30 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
@@ -192,9 +191,7 @@ export default function MaritimeRegionPage() {
         </div>
       </section>
 
-      {/* ============================================
-          6. RETOUR À DÉCOUVRIR
-      ============================================ */}
+      {/* RETOUR À DÉCOUVRIR */}
       <section className="py-12 md:py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <Link

@@ -24,7 +24,7 @@ export const MARITIME_REGION = {
       icon: 'Landmark',
       items: [
         { name: 'Palais de Lomé', description: 'Architecture coloniale' },
-        { name: 'Marché d\'Assigamé', description: 'Plus grand marché de la région' },
+        { name: "Marché d'Assigamé", description: 'Plus grand marché de la région' },
         { name: 'Fort de San Salvador', description: 'Patrimoine historique à Agbodrafo' },
       ],
     },
@@ -34,7 +34,7 @@ export const MARITIME_REGION = {
       icon: 'Waves',
       items: [
         { name: 'Plage de Lomé', description: 'Plage urbaine animée' },
-        { name: 'Plage d\'Aneho', description: 'Plage calme et traditionnelle' },
+        { name: "Plage d'Aneho", description: 'Plage calme et traditionnelle' },
         { name: 'Plage de Bè', description: 'Quartier balnéaire' },
       ],
     },
@@ -54,6 +54,7 @@ export const MARITIME_REGION = {
       icon: 'Hotel',
       items: [],
       note: 'Liste en cours de constitution',
+      link: '/discover/regions/maritime/hotels',
     },
     {
       id: 'restaurants',
@@ -61,6 +62,7 @@ export const MARITIME_REGION = {
       icon: 'UtensilsCrossed',
       items: [],
       note: 'Liste en cours de constitution',
+      link: '/discover/regions/maritime/restaurants',
     },
     {
       id: 'activites',
