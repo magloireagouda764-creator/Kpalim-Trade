@@ -43,7 +43,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 /**
  * Les 9 grandes rubriques du Pôle 2 — Découvrir le Togo
- * (ajout de "La végétation" comme 9ème porte)
  */
 const DISCOVER_SECTIONS = [
   {
@@ -201,18 +200,18 @@ export default function DiscoverTogoPage() {
             {SHOWCASE_IMAGES.map((img, index) => (
               <div
                 key={index}
-                className="group relative overflow-hidden rounded-md border border-white/10 bg-night-light"
+                className="group relative overflow-hidden rounded-md border border-white/10 bg-white/5"
               >
-                <div className="relative aspect-[4/3] w-full overflow-hidden">
+                <div className="relative aspect-square w-full overflow-hidden bg-white">
                   <Image
                     src={img.src}
                     alt={img.alt}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                 </div>
-                <div className="p-3 text-center">
+                <div className="p-3 text-center bg-night-light">
                   <p className="text-white text-sm font-medium">{img.caption}</p>
                 </div>
               </div>
