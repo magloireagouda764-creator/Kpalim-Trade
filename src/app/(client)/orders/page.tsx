@@ -28,7 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default async function OrdersPage() {
   const cookieStore = await cookies();
-  const token = getTokenFromCookie(cookieStore.toString());
+  const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
 
   if (!payload) return <p>Non autorisé</p>;
