@@ -8,7 +8,7 @@ const AUTH_ROUTES = ['/auth/login', '/auth/register'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = await getTokenFromCookie()uest.headers.get('cookie') || '');
+     const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
 
   if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
