@@ -5,7 +5,7 @@ import { verifyToken, getTokenFromCookie } from '@/lib/auth';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = getTokenFromCookie(_req.headers.get('cookie') || '');
+       const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
 
