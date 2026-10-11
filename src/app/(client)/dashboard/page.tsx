@@ -1,93 +1,140 @@
-import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { connectDB } from '@/lib/mongodb';
-import { Order } from '@/models/Order';
-import { verifyToken, getTokenFromCookie } from '@/lib/auth';
+import { Building2, Plus, Edit, Eye } from 'lucide-react';
+import mongoose from 'mongoose';
+import { Accommodation } from '@/models/Accommodation';
 
-export const metadata: Metadata = { title: 'Mon Tableau de Bord' };
+export const metadata = {
+  title: 'Mes établissements | Kpalimé-Trade',
+  description: 'Gérez vos hôtels et hébergements',
+};
 
-export default async function ClientDashboard() {
-  const cookieStore = await cookies();
-  const token = getTokenFromCookie(cookieStore.toString());
-  const payload = token ? await verifyToken(token) : null;
+// Connexion directe à MongoDB
+async function connectDB() {
+  if (mongoose.connections[0].readyState) return;
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) throw new Error('MONGODB_URI non défini');
+  await mongoose.connect(MONGODB_URI);
+}
 
-  if (!payload) return <p>Non autorisé</p>;
+export default async function DashboardAccommodationsPage() {
+  let accommodations: any[] = [];
+  let error: string | null = null;
 
-  await connectDB();
+  try {
+    await connectDB();
 
-  const [totalOrders, recentOrdersData] = await Promise.all([
-    Order.countDocuments({ userId: payload.userId }),
-    Order.find({ userId: payload.userId })
+    // ID de test (à remplacer par l'ID réel de l'utilisateur connecté)
+    const ownerId = '674f3b8e9c8d4e001f8b4567';
+
+    // Récupérer directement les établissements depuis MongoDB
+    accommodations = await Accommodation.find({ ownerId: new mongoose.Types.ObjectId(ownerId) })
+      .select('-documents')
       .sort({ createdAt: -1 })
-      .limit(5)
-      .lean(),
-  ]);
+      .lean();
 
-  const recentOrders = recentOrdersData as any[];
+  } catch (err: any) {
+    console.error('Erreur chargement établissements:', err);
+    error = 'Impossible de charger vos établissements.';
+  }
 
-  const STATUS_LABELS: Record<string, string> = {
-    pending: 'En attente',
-    confirmed: 'Confirmée',
-    preparing: 'En préparation',
-    shipped: 'Expédiée',
-    delivered: 'Livrée',
-    cancelled: 'Annulée',
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, { color: string; label: string }> = {
+      draft: { color: 'bg-gray-500/20 text-gray-300', label: 'Brouillon' },
+      pending: { color: 'bg-yellow-500/20 text-yellow-300', label: 'En attente' },
+      approved: { color: 'bg-emerald-brand/20 text-emerald-brand', label: 'Approuvé' },
+      rejected: { color: 'bg-red-500/20 text-red-300', label: 'Refusé' },
+      needs_correction: { color: 'bg-orange-500/20 text-orange-300', label: 'À corriger' },
+      suspended: { color: 'bg-purple-500/20 text-purple-300', label: 'Suspendu' },
+    };
+    
+    const badge = badges[status] || badges.draft;
+    
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${badge.color}`}>
+        {badge.label}
+      </span>
+    );
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Bonjour 👋</h1>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div className="p-5 rounded-xl bg-kpalime-sand/50 border border-kpalime-sand">
-          <p className="text-sm text-gray-500">Total commandes</p>
-          <p className="text-3xl font-bold mt-1">{totalOrders}</p>
+    <div className="p-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">Mes établissements</h1>
+          <p className="text-muted text-sm">Gérez vos hôtels et hébergements</p>
         </div>
-
-        <Link
-          href="/orders"
-          className="p-5 rounded-xl bg-green-50 border border-green-100 hover:bg-green-100 transition-colors"
+        
+        <Link 
+          href="/dashboard/accommodations/new"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
         >
-          <p className="text-sm text-gray-500">Voir toutes mes commandes</p>
-          <p className="text-lg font-bold mt-1 text-kpalime-green">→ Consulter</p>
+          <Plus size={18} />
+          Ajouter un établissement
         </Link>
       </div>
 
-      {recentOrders.length > 0 && (
-        <div>
-          <h2 className="text-lg font-bold mb-3">Commandes récentes</h2>
-          <div className="space-y-2">
-            {recentOrders.map((order: any) => (
-              <Link
-                key={order._id?.toString()}
-                href={`/orders/${order._id?.toString()}`}
-                prefetch
-                className="block p-4 rounded-xl border border-gray-100 hover:shadow-sm transition-shadow"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium">{order.reference}</p>
-                    <p className="text-sm text-gray-500">
-                      {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString('fr-FR')
-                        : 'Date inconnue'}{' '}
-                      • {(order.items || []).length} article(s)
-                    </p>
-                  </div>
+      {error && (
+        <div className="mb-6 p-4 rounded-md bg-red-500/10 border border-red-500/30 text-red-300">
+          {error}
+        </div>
+      )}
 
-                  <div className="text-right">
-                    <p className="font-bold">
-                      {Number(order.total || 0).toLocaleString('fr-FR')} FCFA
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {STATUS_LABELS[order.status] || order.status}
-                    </p>
+      {accommodations.length === 0 && !error && (
+        <div className="text-center py-16 rounded-md border border-white/10 bg-night-light">
+          <Building2 size={48} className="text-muted mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Aucun établissement pour le moment</h3>
+          <p className="text-muted mb-6 max-w-md mx-auto">
+            Créez votre premier hôtel ou hébergement pour commencer à apparaître sur Kpalimé-Trade.
+          </p>
+          <Link 
+            href="/dashboard/accommodations/new"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
+          >
+            <Plus size={18} />
+            Créer mon premier établissement
+          </Link>
+        </div>
+      )}
+
+      {accommodations.length > 0 && (
+        <div className="space-y-4">
+          {accommodations.map((hotel: any) => (
+            <div key={hotel._id} className="rounded-md border border-white/10 bg-night-light p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-bold text-white">{hotel.name}</h3>
+                    {getStatusBadge(hotel.status)}
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted">
+                    <span>{hotel.type === 'hotel' ? 'Hôtel' : 'Hébergement'}</span>
+                    <span>•</span>
+                    <span>{hotel.city}</span>
+                    <span>•</span>
+                    <span>Créé le {new Date(hotel.createdAt).toLocaleDateString('fr-FR')}</span>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/discover/regions/maritime/hotels/${hotel.slug}`}
+                    className="p-2 rounded-md bg-white/5 hover:bg-white/10 text-white transition-colors"
+                    title="Voir"
+                  >
+                    <Eye size={18} />
+                  </Link>
+                  <Link
+                    href={`/dashboard/accommodations/${hotel._id}/edit`}
+                    className="p-2 rounded-md bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 transition-colors"
+                    title="Modifier"
+                  >
+                    <Edit size={18} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
