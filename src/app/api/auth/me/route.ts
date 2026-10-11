@@ -1,24 +1,34 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { connectDB } from '@/lib/mongodb';
-import { User } from '@/models/User';
-import { verifyToken, getTokenFromCookie } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
-    if (!token) return NextResponse.json({ user: null });
+    // ✅ Correction ici : on appelle la fonction sans argument
+    const token = await getTokenFromCookie();
+    
+    if (!token) {
+      return NextResponse.json({ success: false, user: null }, { status: 401 });
+    }
 
     const payload = await verifyToken(token);
-    if (!payload) return NextResponse.json({ user: null });
+    
+    if (!payload) {
+      return NextResponse.json({ success: false, user: null }, { status: 401 });
+    }
 
-    await connectDB();
-    const user = await User.findById(payload.userId).select('-password');
-    if (!user || !user.isActive) return NextResponse.json({ user: null });
-
-    return NextResponse.json({
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
-    });
-  } catch {
-    return NextResponse.json({ user: null });
+    // On retourne les informations de l'utilisateur décodées depuis le token
+    return NextResponse.json({ 
+      success: true, 
+      user: {
+        id: payload.userId,
+        email: payload.email,
+        role: payload.role,
+        name: payload.name || 'Utilisateur'
+      } 
+    }, { status: 200 });
+    
+  } catch (error) {
+    console.error('Erreur API GET /api/auth/me:', error);
+    return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
   }
 }
