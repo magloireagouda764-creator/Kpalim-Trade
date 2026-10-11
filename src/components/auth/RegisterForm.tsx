@@ -13,6 +13,7 @@ const ROLES: { value: UserRole; label: string }[] = [
   { value: 'client', label: 'Client (acheter)' },
   { value: 'vendor', label: 'Vendeur (boutique)' },
   { value: 'professional', label: 'Professionnel (services)' },
+  { value: 'accommodation_owner', label: 'Propriétaire (hôtels/hébergements)' }, // ✅ Nouveau rôle ajouté
 ];
 
 export function RegisterForm() {
@@ -45,7 +46,14 @@ export function RegisterForm() {
       }
 
       login('', data.user);
-      const roleRedirect = role === 'vendor' ? '/vendor/dashboard' : '/dashboard';
+      
+      // ✅ Redirection selon le rôle
+      const roleRedirect = role === 'vendor' 
+        ? '/vendor/dashboard' 
+        : role === 'accommodation_owner'
+        ? '/dashboard/accommodations/new' // ✅ Redirection vers le formulaire d'hôtel
+        : '/dashboard';
+      
       router.push(roleRedirect);
     } catch {
       setError('Erreur réseau');
