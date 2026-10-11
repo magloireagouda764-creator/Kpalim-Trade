@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload || payload.role !== 'vendor') {
       return NextResponse.json({ success: false, error: 'Réservé aux vendeurs' }, { status: 403 });

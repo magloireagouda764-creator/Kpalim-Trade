@@ -21,7 +21,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload || (payload.role !== 'vendor' && payload.role !== 'admin')) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 403 });
@@ -42,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload || (payload.role !== 'vendor' && payload.role !== 'admin')) {
       return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 403 });

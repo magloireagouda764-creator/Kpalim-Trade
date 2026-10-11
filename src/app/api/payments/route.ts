@@ -7,7 +7,7 @@ import { initiateMobileMoneyPayment } from '@/services/mobilemoney.service';
 
 export async function POST(req: NextRequest) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ success: false, error: 'Connexion requise' }, { status: 401 });
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload || payload.role !== 'admin') return NextResponse.json({ success: false, error: 'Admin uniquement' }, { status: 403 });
 

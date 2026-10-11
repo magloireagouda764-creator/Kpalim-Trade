@@ -4,7 +4,7 @@ import { getUserNotifications, getUnreadCount } from '@/services/notification.se
 
 export async function GET(req: NextRequest) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
 

@@ -5,7 +5,7 @@ import { verifyToken, getTokenFromCookie } from '@/lib/auth';
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload || payload.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Admin uniquement' }, { status: 403 });
@@ -25,7 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload || payload.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Admin uniquement' }, { status: 403 });

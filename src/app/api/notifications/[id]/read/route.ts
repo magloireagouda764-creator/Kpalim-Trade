@@ -4,7 +4,7 @@ import { markAsRead } from '@/services/notification.service';
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const token = getTokenFromCookie(req.headers.get('cookie') || '');
+    const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ success: false, error: 'Non autorisé' }, { status: 401 });
 
