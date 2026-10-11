@@ -7,8 +7,7 @@ import { verifyToken, getTokenFromCookie } from '@/lib/auth';
 export const metadata: Metadata = { title: 'Mon Profil' };
 
 export default async function ProfilePage() {
-  const cookieStore = await cookies();
-  const token = getTokenFromCookie(cookieStore.toString());
+     const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
   if (!payload) return <p>Non autorisé</p>;
 
