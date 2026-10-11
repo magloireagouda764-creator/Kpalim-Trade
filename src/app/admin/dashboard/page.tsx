@@ -17,8 +17,7 @@ import { verifyToken, getTokenFromCookie } from '@/lib/auth';
 export const metadata: Metadata = { title: 'Admin Dashboard' };
 
 export default async function AdminDashboard() {
-  const cookieStore = await cookies();
-  const token = getTokenFromCookie(cookieStore.toString());
+  const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
 
   if (!payload || payload.role !== 'admin') {
