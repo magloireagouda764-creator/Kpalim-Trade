@@ -1,37 +1,27 @@
-import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
-import bcrypt from 'bcryptjs';
-import type { JwtPayload } from '@/types';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
-const SECRET = new TextEncoder().encode(process.env.AUTH_SECRET!);
-
-if (!process.env.AUTH_SECRET) throw new Error('AUTH_SECRET manquant');
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12);
+interface JWTPayload {
+  userId: string;
+  role: string;
+  email: string;
 }
 
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
-
-export async function createToken(payload: JwtPayload): Promise<string> {
-  return new SignJWT({ ...payload } as JWTPayload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(SECRET);
-}
-
-export async function verifyToken(token: string): Promise<JwtPayload | null> {
+export async function getCurrentUser(): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
-    return payload as unknown as JwtPayload;
-  } catch {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('kpalime_token')?.value;
+
+    if (!token) {
+      return null;
+    }
+
+    const JWT_SECRET = process.env.AUTH_SECRET || 'votre_secret_jwt';
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+
+    return decoded;
+  } catch (error) {
+    console.error('Erreur décodage JWT:', error);
     return null;
   }
-}
-
-export function getTokenFromCookie(cookies: string): string | null {
-  const match = cookies.match(/(?:^|;\s*)kpalime_token=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
 }
