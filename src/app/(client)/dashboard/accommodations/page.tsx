@@ -1,29 +1,53 @@
 import Link from 'next/link';
-import { Building2, Plus, Edit, Trash2, Eye, AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { Building2, Plus, Edit, Eye } from 'lucide-react';
+import mongoose from 'mongoose';
 
 export const metadata = {
   title: 'Mes établissements | Kpalimé-Trade',
   description: 'Gérez vos hôtels et hébergements',
 };
 
+// Import dynamique du modèle pour éviter les erreurs
+async function getAccommodationModel() {
+  const { Accommodation } = await import('@/models/Accommodation');
+  return Accommodation;
+}
+
+async function connectDB() {
+  if (mongoose.connections[0].readyState) return;
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) throw new Error('MONGODB_URI non défini dans les variables d\'environnement');
+  await mongoose.connect(MONGODB_URI);
+}
+
 export default async function DashboardAccommodationsPage() {
   let accommodations: any[] = [];
+  let debugInfo = '';
   let error: string | null = null;
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kpalim-trade.vercel.app';
-    const res = await fetch(`${baseUrl}/api/accommodations/owner`, {
-      cache: 'no-store',
-    });
+    await connectDB();
+    debugInfo += '✅ Connexion MongoDB OK. ';
+
+    const Accommodation = await getAccommodationModel();
+    debugInfo += '✅ Modèle Accommodation chargé. ';
+
+    // Compter tous les établissements en base
+    const totalCount = await Accommodation.countDocuments({});
+    debugInfo += ` Total en base : ${totalCount} établissement(s). `;
+
+    // Récupérer TOUS les établissements (sans filtre) pour le DEBUG
+    accommodations = await Accommodation.find({})
+      .select('-documents')
+      .sort({ createdAt: -1 })
+      .lean();
     
-    const data = await res.json();
-    if (data.success) {
-      accommodations = data.data || [];
-    } else {
-      error = data.error;
-    }
-  } catch (err) {
-    error = 'Impossible de charger vos établissements.';
+    debugInfo += `✅ ${accommodations.length} établissement(s) récupéré(s). `;
+
+  } catch (err: any) {
+    console.error('Erreur détaillée:', err);
+    error = `Erreur : ${err.message || 'Inconnue'}`;
+    debugInfo += `❌ Erreur : ${err.message}`;
   }
 
   const getStatusBadge = (status: string) => {
@@ -35,9 +59,7 @@ export default async function DashboardAccommodationsPage() {
       needs_correction: { color: 'bg-orange-500/20 text-orange-300', label: 'À corriger' },
       suspended: { color: 'bg-purple-500/20 text-purple-300', label: 'Suspendu' },
     };
-    
     const badge = badges[status] || badges.draft;
-    
     return (
       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${badge.color}`}>
         {badge.label}
@@ -47,6 +69,11 @@ export default async function DashboardAccommodationsPage() {
 
   return (
     <div className="p-6">
+      {/* Bloc DEBUG - à supprimer après test */}
+      <div className="mb-6 p-4 rounded-md bg-blue-500/10 border border-blue-500/30 text-blue-200 text-sm font-mono">
+        <strong className="text-blue-300">🔍 DEBUG :</strong> {debugInfo}
+      </div>
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-white mb-1">Mes établissements</h1>
@@ -101,7 +128,13 @@ export default async function DashboardAccommodationsPage() {
                     <span>•</span>
                     <span>{hotel.city}</span>
                     <span>•</span>
+                    <span>Owner: {hotel.ownerName || 'N/A'}</span>
+                    <span>•</span>
                     <span>Créé le {new Date(hotel.createdAt).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                  
+                  <div className="mt-2 text-xs text-muted font-mono">
+                    ID: {hotel._id.toString()}
                   </div>
                 </div>
 
