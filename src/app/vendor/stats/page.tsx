@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: 'Statistiques Vendeur' };
 
 export default async function VendorStatsPage() {
   const cookieStore = await cookies();
-  const token = getTokenFromCookie(cookieStore.toString());
+  const token = getTokenFromCookie(await getTokenFromCookie());
   const payload = token ? await verifyToken(token) : null;
 
   if (!payload) return <p>Non autorisé</p>;

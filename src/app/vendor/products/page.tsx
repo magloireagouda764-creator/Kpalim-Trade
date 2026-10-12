@@ -19,7 +19,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 
 export default async function VendorProductsPage() {
   const cookieStore = await cookies();
-  const token = getTokenFromCookie(cookieStore.toString());
+  const token = getTokenFromCookie(await getTokenFromCookie());
   const payload = token ? await verifyToken(token) : null;
   if (!payload) return <p>Non autorisé</p>;
 
