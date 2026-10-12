@@ -1,4 +1,4 @@
-export type UserRole = 'client' | 'vendor' | 'professional' | 'admin';
+export type UserRole = 'client' | 'vendor' | 'professional' | 'admin' | 'accommodation_owner';
 export type CurrencyCode = 'XOF' | 'USD' | 'EUR';
 export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'shipped' | 'delivered' | 'cancelled';
 export type ShopStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
