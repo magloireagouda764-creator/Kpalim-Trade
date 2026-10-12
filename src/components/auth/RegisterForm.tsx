@@ -13,7 +13,7 @@ const ROLES: { value: UserRole; label: string }[] = [
   { value: 'client', label: 'Client (acheter)' },
   { value: 'vendor', label: 'Vendeur (boutique)' },
   { value: 'professional', label: 'Professionnel (services)' },
-  { value: 'accommodation_owner', label: 'Propriétaire (hôtels/hébergements)' }, // ✅ Nouveau rôle ajouté
+  { value: 'accommodation_owner', label: 'Propriétaire (hôtels/hébergements)' },
 ];
 
 export function RegisterForm() {
@@ -51,7 +51,7 @@ export function RegisterForm() {
       const roleRedirect = role === 'vendor' 
         ? '/vendor/dashboard' 
         : role === 'accommodation_owner'
-        ? '/dashboard/accommodations/new' // ✅ Redirection vers le formulaire d'hôtel
+        ? '/dashboard/accommodations/new'
         : '/dashboard';
       
       router.push(roleRedirect);
