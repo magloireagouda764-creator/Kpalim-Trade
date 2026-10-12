@@ -5,7 +5,6 @@ import { connectDB } from '@/lib/mongodb';
 import { Shop } from '@/models/Shop';
 import { Product } from '@/models/Product';
 import { verifyToken, getTokenFromCookie } from '@/lib/auth';
-import { cookies } from 'next/headers';
 import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = { title: 'Mes Produits' };
@@ -18,9 +17,10 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default async function VendorProductsPage() {
-  const cookieStore = await cookies();
-  const token = getTokenFromCookie(await getTokenFromCookie());
+  // ✅ CORRECTION ICI : Une seule ligne, propre et sans imbrication
+  const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
+  
   if (!payload) return <p>Non autorisé</p>;
 
   await connectDB();

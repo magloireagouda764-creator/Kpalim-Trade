@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import { connectDB } from '@/lib/mongodb';
 import { Shop } from '@/models/Shop';
 import { Order } from '@/models/Order';
@@ -9,8 +8,8 @@ import { StatsCard } from '@/components/admin/StatsCard';
 export const metadata: Metadata = { title: 'Statistiques Vendeur' };
 
 export default async function VendorStatsPage() {
-  const cookieStore = await cookies();
-  const token = getTokenFromCookie(await getTokenFromCookie());
+  // ✅ CORRECTION ICI : Une seule ligne, propre et sans imbrication
+  const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
 
   if (!payload) return <p>Non autorisé</p>;
