@@ -1,4 +1,5 @@
-// Déploiement Vercelimport Link from 'next/link';
+// Déploiement Vercel
+import Link from 'next/link';
 import {
   ShoppingBag,
   Palmtree,
