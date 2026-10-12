@@ -21,7 +21,12 @@ const schema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone: { type: String, required: true, trim: true },
     password: { type: String, required: true, select: false },
-    role: { type: String, enum: ['client', 'vendor', 'professional', 'admin'], default: 'client' },
+    // ✅ CORRECTION ICI : ajout de 'accommodation_owner'
+    role: { 
+      type: String, 
+      enum: ['client', 'vendor', 'professional', 'admin', 'accommodation_owner'], 
+      default: 'client' 
+    },
     avatar: { type: String },
     isVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
