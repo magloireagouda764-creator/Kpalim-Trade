@@ -1,4 +1,4 @@
-// Déploiement Vercel
+// Trigger Vercel deployment// Déploiement Vercel
 import Link from 'next/link';
 import {
   ShoppingBag,
