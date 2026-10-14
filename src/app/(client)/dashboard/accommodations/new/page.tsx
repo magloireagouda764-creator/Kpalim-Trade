@@ -109,9 +109,10 @@ export default function NewAccommodationPage() {
       
       const data = await res.json();
 
+      // ✅ MODIFICATION ICI : Redirection vers la page d'attente avec la région
       if (data.success) {
         setSuccess(true);
-        setTimeout(() => router.push("/dashboard/accommodations"), 2000);
+        setTimeout(() => router.push(`/dashboard/accommodations/pending?region=${formData.region}`), 2000);
       } else {
         setError(data.error || "Une erreur est survenue.");
       }
