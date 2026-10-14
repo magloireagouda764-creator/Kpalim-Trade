@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Home, ShoppingBag, UtensilsCrossed, ShoppingCart,
   Palmtree, Hotel, CalendarDays, Wrench, Palette,
-  LogIn, UserPlus, LogOut, LayoutDashboard, Store, Settings, ChevronDown, Search,
+  LogOut, LayoutDashboard, Store, Settings, ChevronDown, Search,
 } from 'lucide-react';
 import { APP_NAME } from '@/lib/constants';
 import { CurrencySelector } from '@/components/currency/CurrencySelector';
@@ -67,14 +67,8 @@ export function Header() {
     }
   };
 
-  // Lien du tableau de bord selon le rôle
-  const dashboardHref = !user
-    ? '/auth/login'
-    : user.role === 'admin'
-      ? '/admin/dashboard'
-      : user.role === 'vendor'
-        ? '/vendor/dashboard'
-        : '/dashboard';
+  // ✅ MODIFICATION : Lien du tableau de bord FORCÉ vers les hébergements
+  const dashboardHref = '/dashboard/accommodations';
 
   return (
     <header className="sticky top-0 z-50 bg-night/95 backdrop-blur border-b border-white/10">
@@ -209,15 +203,16 @@ export function Header() {
                   )}
                 </div>
               ) : (
-                /* Utilisateur non connecté : boutons Connexion / Inscription */
-                <>
-                  <Link href="/auth/login" prefetch className="hidden sm:inline-flex touch-target items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted hover:bg-white/10 hover:text-white transition-colors">
-                    <LogIn size={20} /> <span>Connexion</span>
-                  </Link>
-                  <Link href="/auth/register" prefetch className="touch-target inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold bg-emerald-brand text-white hover:bg-emerald-light transition-colors">
-                    <UserPlus size={20} /> <span className="hidden sm:inline">S'inscrire</span><span className="sm:hidden">Inscription</span>
-                  </Link>
-                </>
+                /* ✅ MODIFICATION : Plus de Connexion/Inscription, juste un accès direct au Dashboard */
+                <Link 
+                  href={dashboardHref} 
+                  prefetch 
+                  className="touch-target inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold bg-emerald-brand text-white hover:bg-emerald-light transition-colors"
+                >
+                  <LayoutDashboard size={20} /> 
+                  <span className="hidden sm:inline">Tableau de bord</span>
+                  <span className="sm:hidden">Dashboard</span>
+                </Link>
               )}
             </>
           )}

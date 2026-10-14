@@ -1,8 +1,5 @@
-import type { Metadata } from 'next';
-import { RegisterForm } from '@/components/auth/RegisterForm';
-
-export const metadata: Metadata = { title: 'Inscription' };
+import { redirect } from 'next/navigation';
 
 export default function RegisterPage() {
-  return <RegisterForm />;
+  redirect('/dashboard/accommodations');
 }

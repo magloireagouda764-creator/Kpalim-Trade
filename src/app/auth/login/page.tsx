@@ -1,8 +1,5 @@
-import type { Metadata } from 'next';
-import { LoginForm } from '@/components/auth/LoginForm';
-
-export const metadata: Metadata = { title: 'Connexion' };
+import { redirect } from 'next/navigation';
 
 export default function LoginPage() {
-  return <LoginForm />;
+  redirect('/dashboard/accommodations');
 }
