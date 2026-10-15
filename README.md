@@ -23,3 +23,4 @@ Plateforme numérique de référence de Kpalimé : commerce, tourisme, culture, 
 ```bash
 npm install
 npm run dev
+ 
