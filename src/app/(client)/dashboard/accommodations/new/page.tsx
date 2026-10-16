@@ -40,7 +40,6 @@ export default function NewAccommodationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -49,7 +48,7 @@ export default function NewAccommodationPage() {
     ownerName: "",
     phone: "",
     email: "",
-    region: "Maritime",
+    region: "Maritime", // Par défaut
     city: "",
     district: "",
     address: "",
@@ -97,7 +96,7 @@ export default function NewAccommodationPage() {
     try {
       const payload = { 
         ...formData, 
-        ownerId: "674f3b8e9c8d4e001f8b4567", // Sera remplacé par l'ID réel de l'utilisateur connecté
+        ownerId: "674f3b8e9c8d4e001f8b4567", // À remplacer par l'ID réel de l'utilisateur connecté via l'auth
         ownerName: formData.ownerName 
       };
       
@@ -109,12 +108,11 @@ export default function NewAccommodationPage() {
       
       const data = await res.json();
 
-      // ✅ MODIFICATION ICI : Redirection vers la page d'attente avec la région
       if (data.success) {
-        setSuccess(true);
-        setTimeout(() => router.push(`/dashboard/accommodations/pending?region=${formData.region}`), 2000);
+        // ✅ REDIRECTION IMMÉDIATE VERS LA PAGE D'ATTENTE AVEC LA RÉGION
+        router.push(`/dashboard/accommodations/pending?region=${formData.region}`);
       } else {
-        setError(data.error || "Une erreur est survenue.");
+        setError(data.error || "Une erreur est survenue lors de la création.");
       }
     } catch (err) {
       console.error(err);
@@ -123,19 +121,6 @@ export default function NewAccommodationPage() {
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-night flex items-center justify-center p-4">
-        <div className="bg-night-light border border-emerald-brand/30 rounded-lg p-8 text-center max-w-md w-full">
-          <CheckCircle className="w-16 h-16 text-emerald-brand mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Fiche créée avec succès !</h2>
-          <p className="text-muted mb-6">Votre établissement est enregistré en tant que <strong>brouillon</strong>.</p>
-          <p className="text-sm text-white/60">Redirection en cours...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-night py-8 px-4">
@@ -156,7 +141,6 @@ export default function NewAccommodationPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          
           {/* SECTION A : Informations générales */}
           <section className="bg-night-light border border-white/10 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
@@ -293,13 +277,12 @@ export default function NewAccommodationPage() {
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
-              {loading ? "Enregistrement..." : "Enregistrer comme brouillon"}
+              {loading ? "Enregistrement..." : "Enregistrer et soumettre"}
             </button>
             <Link href="/dashboard/accommodations" className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-white/5 text-white font-semibold hover:bg-white/10 border border-white/10 transition-all">
               Annuler
             </Link>
           </div>
-
         </form>
       </div>
     </div>
