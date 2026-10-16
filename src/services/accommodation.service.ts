@@ -114,6 +114,30 @@ export async function updateAccommodation(
 }
 
 // ============================================
+// SUPPRESSION
+// ============================================
+
+export async function deleteAccommodation(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: 'ID invalide' };
+    }
+
+    const deleted = await Accommodation.findByIdAndDelete(id);
+    if (!deleted) {
+      return { success: false, error: 'Établissement non trouvé' };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('❌ Erreur suppression:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
+  }
+}
+
+// ============================================
 // RÉCUPÉRATION PAR ID
 // ============================================
 
