@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Building2, Eye, CheckCircle, XCircle, AlertCircle, Filter, Search } from 'lucide-react';
+import { Building2, Eye, CheckCircle, Search } from 'lucide-react';
 import mongoose from 'mongoose';
 import { Accommodation } from '@/models/Accommodation';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -19,26 +19,29 @@ async function connectDB() {
 export default async function AdminAccommodationsPage({
   searchParams,
 }: {
-  searchParams: { status?: string; region?: string; search?: string };
+  searchParams: Promise<{ status?: string; region?: string; search?: string }>;
 }) {
   await connectDB();
+  
+  // ✅ Next.js 15 : on doit attendre searchParams
+  const resolvedSearchParams = await searchParams;
 
   // Construire la requête avec filtres
   const query: any = {};
   
-  if (searchParams.status) {
-    query.status = searchParams.status;
+  if (resolvedSearchParams.status) {
+    query.status = resolvedSearchParams.status;
   } else {
     // Par défaut, montrer les "pending"
     query.status = 'pending';
   }
 
-  if (searchParams.region) {
-    query.region = searchParams.region;
+  if (resolvedSearchParams.region) {
+    query.region = resolvedSearchParams.region;
   }
 
-  if (searchParams.search) {
-    query.$text = { $search: searchParams.search };
+  if (resolvedSearchParams.search) {
+    query.$text = { $search: resolvedSearchParams.search };
   }
 
   // Récupérer les établissements
@@ -66,10 +69,10 @@ export default async function AdminAccommodationsPage({
 
       {/* Statistiques rapides */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <StatCard label="En attente" value={stats.pending || 0} color="bg-yellow-500/20 text-yellow-300 border-yellow-500/30" active={searchParams.status === 'pending' || !searchParams.status} href="/admin/accommodations?status=pending" />
-        <StatCard label="Approuvés" value={stats.approved || 0} color="bg-emerald-500/20 text-emerald-300 border-emerald-500/30" active={searchParams.status === 'approved'} href="/admin/accommodations?status=approved" />
-        <StatCard label="Refusés" value={stats.rejected || 0} color="bg-red-500/20 text-red-300 border-red-500/30" active={searchParams.status === 'rejected'} href="/admin/accommodations?status=rejected" />
-        <StatCard label="À corriger" value={stats.needs_correction || 0} color="bg-orange-500/20 text-orange-300 border-orange-500/30" active={searchParams.status === 'needs_correction'} href="/admin/accommodations?status=needs_correction" />
+        <StatCard label="En attente" value={stats.pending || 0} color="bg-yellow-500/20 text-yellow-300 border-yellow-500/30" active={resolvedSearchParams.status === 'pending' || !resolvedSearchParams.status} href="/admin/accommodations?status=pending" />
+        <StatCard label="Approuvés" value={stats.approved || 0} color="bg-emerald-500/20 text-emerald-300 border-emerald-500/30" active={resolvedSearchParams.status === 'approved'} href="/admin/accommodations?status=approved" />
+        <StatCard label="Refusés" value={stats.rejected || 0} color="bg-red-500/20 text-red-300 border-red-500/30" active={resolvedSearchParams.status === 'rejected'} href="/admin/accommodations?status=rejected" />
+        <StatCard label="À corriger" value={stats.needs_correction || 0} color="bg-orange-500/20 text-orange-300 border-orange-500/30" active={resolvedSearchParams.status === 'needs_correction'} href="/admin/accommodations?status=needs_correction" />
       </div>
 
       {/* Barre de filtres */}
@@ -77,32 +80,25 @@ export default async function AdminAccommodationsPage({
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <form action="/admin/accommodations" method="GET" className="flex gap-2">
-              <input
-                type="hidden"
-                name="status"
-                value={searchParams.status || 'pending'}
-              />
+              <input type="hidden" name="status" value={resolvedSearchParams.status || 'pending'} />
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                 <input
                   type="text"
                   name="search"
-                  defaultValue={searchParams.search}
+                  defaultValue={resolvedSearchParams.search}
                   placeholder="Rechercher par nom, ville..."
                   className="w-full bg-night border border-white/10 rounded-md pl-10 pr-4 py-2 text-white focus:border-emerald-brand focus:outline-none"
                 />
               </div>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-emerald-brand text-white rounded-md hover:bg-emerald-light transition-colors"
-              >
+              <button type="submit" className="px-4 py-2 bg-emerald-brand text-white rounded-md hover:bg-emerald-light transition-colors">
                 Rechercher
               </button>
             </form>
           </div>
 
           <select
-            defaultValue={searchParams.region}
+            defaultValue={resolvedSearchParams.region}
             onChange={(e) => {
               const url = new URL(window.location.href);
               if (e.target.value) {
@@ -130,7 +126,7 @@ export default async function AdminAccommodationsPage({
           <CheckCircle size={48} className="text-emerald-brand mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Aucun établissement</h3>
           <p className="text-muted">
-            {searchParams.status === 'pending' 
+            {resolvedSearchParams.status === 'pending' 
               ? 'Aucun établissement en attente de validation.' 
               : 'Aucun résultat pour ces filtres.'}
           </p>
@@ -156,13 +152,7 @@ export default async function AdminAccommodationsPage({
                     <span>{hotel.roomsCount} chambres</span>
                     <span>•</span>
                     <span>Propriétaire: {hotel.ownerName}</span>
-                    <span>•</span>
-                    <span>{new Date(hotel.createdAt).toLocaleDateString('fr-FR')}</span>
                   </div>
-
-                  <p className="text-sm text-white/70 mt-2 line-clamp-2">
-                    {hotel.description}
-                  </p>
 
                   {hotel.status === 'rejected' && hotel.rejectionReason && (
                     <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-300">
@@ -195,7 +185,6 @@ export default async function AdminAccommodationsPage({
   );
 }
 
-// Composant carte statistique cliquable
 function StatCard({ label, value, color, active, href }: { 
   label: string; 
   value: number; 
