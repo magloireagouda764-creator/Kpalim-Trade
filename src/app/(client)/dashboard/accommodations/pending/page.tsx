@@ -8,7 +8,6 @@ export default function PendingAccommodationPage() {
   const searchParams = useSearchParams();
   const region = searchParams.get('region') || 'Maritime';
 
-  // Ce lien correspond exactement au chemin que tu as confirmé dans ton terminal
   const discoverLink = `/discover/regions/${region.toLowerCase()}/hotels`;
 
   return (

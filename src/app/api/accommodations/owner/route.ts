@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { getOwnerAccommodations } from '@/services/accommodation.service';
-import { AccommodationStatus } from '@/types/accommodation';
+import { getOwnerAccommodations, getDashboardStats } from '@/services/accommodation.service';
 
 async function connectDB() {
   if (mongoose.connections[0].readyState) return;
@@ -10,39 +9,21 @@ async function connectDB() {
   await mongoose.connect(MONGODB_URI);
 }
 
-// Fonction pour récupérer l'utilisateur connecté depuis les cookies
+// Fonction pour récupérer l'utilisateur connecté (à remplacer par ton système d'auth)
 async function getCurrentUser(request: NextRequest) {
-  try {
-    // Récupérer le token depuis les cookies
-    const token = request.cookies.get('token')?.value || 
-                  request.cookies.get('next-auth.session-token')?.value ||
-                  request.headers.get('authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-      return null;
-    }
-
-    // TODO: Décoder le token JWT pour récupérer l'ID utilisateur
-    // Pour l'instant, on retourne un ID de test
-    // Dans un projet réel, il faudrait utiliser jose ou jsonwebtoken
-    
-    return {
-      id: '674f3b8e9c8d4e001f8b4567', // ID de test - à remplacer par l'ID réel
-      name: 'Utilisateur Test',
-    };
-  } catch (error) {
-    console.error('Erreur récupération utilisateur:', error);
-    return null;
-  }
+  // TODO: Implémenter la vérification du token JWT
+  // Pour l'instant, on retourne un ID de test
+  return {
+    id: '674f3b8e9c8d4e001f8b4567',
+    name: 'Utilisateur Test',
+  };
 }
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
-    // Récupérer l'utilisateur connecté
     const user = await getCurrentUser(request);
-
     if (!user) {
       return NextResponse.json(
         { success: false, error: 'Non authentifié' },
@@ -50,23 +31,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Récupérer le filtre de statut depuis les params URL
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') as AccommodationStatus || undefined;
+    const status = searchParams.get('status') || undefined;
+    const includeStats = searchParams.get('stats') === 'true';
 
-    // Récupérer les établissements du propriétaire
-    const result = await getOwnerAccommodations(user.id, status);
+    // Récupérer les établissements
+    const accommodationsResult = await getOwnerAccommodations(user.id, status);
 
-    if (!result.success) {
+    if (!accommodationsResult.success) {
       return NextResponse.json(
-        { success: false, error: result.error },
+        { success: false, error: accommodationsResult.error },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(result, { status: 200 });
+    // Récupérer les stats si demandé
+    let stats = null;
+    if (includeStats) {
+      const statsResult = await getDashboardStats(user.id);
+      if (statsResult.success) {
+        stats = statsResult.data;
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: accommodationsResult.data,
+      stats,
+    });
   } catch (error: any) {
-    console.error('Erreur API GET /api/accommodations/owner:', error);
+    console.error('❌ Erreur API GET /api/accommodations/owner:', error);
     return NextResponse.json(
       { success: false, error: 'Erreur serveur' },
       { status: 500 }

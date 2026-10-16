@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import {
-  getAccommodationById,
-  updateAccommodation,
-  deleteAccommodation,
+import { 
+  getAccommodationById, 
+  updateAccommodation, 
+  deleteAccommodation 
 } from '@/services/accommodation.service';
-import { AccommodationFormData } from '@/types/accommodation';
 
 async function connectDB() {
   if (mongoose.connections[0].readyState) return;
@@ -14,9 +13,7 @@ async function connectDB() {
   await mongoose.connect(MONGODB_URI);
 }
 
-// ============================================
-// GET
-// ============================================
+// GET : Récupérer un établissement par ID
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -25,26 +22,26 @@ export async function GET(
     await connectDB();
     const { id } = await params;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 });
-    }
-
-    const result = await getAccommodationById(id, { includeDocuments: false });
+    const result = await getAccommodationById(id);
 
     if (!result.success) {
-      return NextResponse.json({ success: false, error: result.error }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json({ success: true, data: result.data });
   } catch (error: any) {
-    console.error('Erreur API GET /api/accommodations/[id]:', error);
-    return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
+    console.error('❌ Erreur API GET /api/accommodations/[id]:', error);
+    return NextResponse.json(
+      { success: false, error: 'Erreur serveur' },
+      { status: 500 }
+    );
   }
 }
 
-// ============================================
-// PUT
-// ============================================
+// PUT : Modifier un établissement
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -52,30 +49,28 @@ export async function PUT(
   try {
     await connectDB();
     const { id } = await params;
+    const body = await request.json();
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 });
-    }
-
-    const body: Partial<AccommodationFormData> = await request.json();
-    const ownerId = '674f3b8e9c8d4e001f8b4567';
-
-    const result = await updateAccommodation(id, body, ownerId);
+    const result = await updateAccommodation(id, body);
 
     if (!result.success) {
-      return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json({ success: true, data: result.data });
   } catch (error: any) {
-    console.error('Erreur API PUT /api/accommodations/[id]:', error);
-    return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
+    console.error('❌ Erreur API PUT /api/accommodations/[id]:', error);
+    return NextResponse.json(
+      { success: false, error: 'Erreur serveur' },
+      { status: 500 }
+    );
   }
 }
 
-// ============================================
-// DELETE
-// ============================================
+// DELETE : Supprimer un établissement
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -84,22 +79,21 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ success: false, error: 'ID invalide' }, { status: 400 });
-    }
-
-    const ownerId = '674f3b8e9c8d4e001f8b4567';
-    const isAdmin = false;
-
-    const result = await deleteAccommodation(id, ownerId, isAdmin);
+    const result = await deleteAccommodation(id);
 
     if (!result.success) {
-      return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: result.error },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json({ success: true, message: 'Établissement supprimé' });
   } catch (error: any) {
-    console.error('Erreur API DELETE /api/accommodations/[id]:', error);
-    return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
+    console.error('❌ Erreur API DELETE /api/accommodations/[id]:', error);
+    return NextResponse.json(
+      { success: false, error: 'Erreur serveur' },
+      { status: 500 }
+    );
   }
 }

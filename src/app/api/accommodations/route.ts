@@ -1,64 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { getPublicAccommodations, createAccommodation } from '@/services/accommodation.service';
-import { AccommodationFilters, AccommodationFormData, TogoRegion, AccommodationType } from '@/types/accommodation';
+import { createAccommodation } from '@/services/accommodation.service';
 
 async function connectDB() {
   if (mongoose.connections[0].readyState) return;
   const MONGODB_URI = process.env.MONGODB_URI;
-  if (!MONGODB_URI) {
-    throw new Error('MONGODB_URI non défini dans les variables d\'environnement');
-  }
+  if (!MONGODB_URI) throw new Error('MONGODB_URI non défini');
   await mongoose.connect(MONGODB_URI);
-}
-
-export async function GET(request: NextRequest) {
-  try {
-    await connectDB();
-    const { searchParams } = new URL(request.url);
-    
-    const filters: AccommodationFilters = {
-      region: searchParams.get('region') as TogoRegion || undefined,
-      type: searchParams.get('type') as AccommodationType || undefined,
-      city: searchParams.get('city') || undefined,
-      search: searchParams.get('search') || undefined,
-      page: parseInt(searchParams.get('page') || '1'),
-      limit: parseInt(searchParams.get('limit') || '20'),
-    };
-
-    const result = await getPublicAccommodations(filters);
-
-    if (!result.success) {
-      return NextResponse.json({ success: false, error: result.error }, { status: 500 });
-    }
-
-    return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('Erreur API GET /api/accommodations:', error);
-    return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
-  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
+    const body = await request.json();
 
-    // Récupérer les données du body (y compris ownerId s'il est envoyé)
-    const body: AccommodationFormData & { ownerId?: string } = await request.json();
+    // Validation des champs obligatoires
+    const requiredFields = ['name', 'type', 'description', 'ownerName', 'phone', 'region', 'city', 'address', 'capacity', 'roomsCount', 'ownerId'];
+    const missingFields = requiredFields.filter(field => !body[field]);
 
-    // Validation basique
-    if (!body.name || !body.type || !body.description || !body.phone) {
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { success: false, error: 'Champs obligatoires manquants' },
+        { success: false, error: `Champs manquants : ${missingFields.join(', ')}` },
         { status: 400 }
       );
     }
 
-    // ✅ CORRECTION : Utiliser l'ownerId envoyé par le frontend, sinon fallback sur l'ID de test
-    const ownerId = body.ownerId || '674f3b8e9c8d4e001f8b4567';
-    const ownerName = body.ownerName || 'Propriétaire Test';
-
-    const result = await createAccommodation(body as AccommodationFormData, ownerId, ownerName);
+    // Créer l'établissement
+    const result = await createAccommodation(body);
 
     if (!result.success) {
       return NextResponse.json(
@@ -67,9 +35,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json(
+      { 
+        success: true, 
+        data: result.data,
+        message: 'Établissement créé avec succès' 
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
-    console.error('Erreur API POST /api/accommodations:', error);
+    console.error(' Erreur API POST /api/accommodations:', error);
     return NextResponse.json(
       { success: false, error: 'Erreur serveur' },
       { status: 500 }

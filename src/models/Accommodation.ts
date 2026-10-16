@@ -1,117 +1,213 @@
 import mongoose, { Schema, Model } from 'mongoose';
+import { 
+  IAccommodation, 
+  AccommodationType, 
+  AccommodationStatus, 
+  TogoRegion, 
+  Currency 
+} from '@/types/accommodation';
 
-export interface IAccommodation {
-  _id: mongoose.Types.ObjectId;
-  name: string;
-  slug: string;
-  type: 'hotel' | 'guesthouse' | 'auberge' | 'apartment' | 'campement' | 'gite';
-  description: string;
-  logo?: string;
-  banner?: string;
-  images: { public_id: string; secure_url: string }[];
-  address: string;
-  city: string;
-  district?: string;
-  phone: string;
-  email?: string;
-  whatsapp?: string;
-  gpsLat?: number;
-  gpsLng?: number;
-  amenities: string[];
-  checkInTime?: string;
-  checkOutTime?: string;
-  isFeatured: boolean;
-  isActive: boolean;
+// ============================================
+// SCHÉMA MONGOOSE
+// ============================================
 
-  // --- NOUVEAUX CHAMPS POUR LE SYSTÈME DE VALIDATION ---
-  status: 'draft' | 'pending' | 'needs_correction' | 'approved' | 'rejected' | 'suspended';
-  ownerId: mongoose.Types.ObjectId;
-  ownerName: string;
-  region: string;
-  prefecture?: string;
-  landmark?: string;
-  website?: string;
-  socialMedia?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-  };
-  priceRange?: string;
-  currency: string;
-  capacity: number;
-  roomsCount: number;
-  publishedAt?: Date;
-  adminNote?: string;
-  rejectionReason?: string;
-  correctionRequest?: string;
-  documents: { public_id: string; secure_url: string; type: string; uploadedAt: Date }[];
-  verificationConfirmed: boolean;
-}
-
-const schema = new Schema<IAccommodation>(
+const AccommodationSchema = new Schema<IAccommodation>(
   {
-    // --- ANCIENS CHAMPS (conservés) ---
-    name: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true },
-    type: { type: String, enum: ['hotel', 'guesthouse', 'auberge', 'apartment', 'campement', 'gite'], required: true },
-    description: { type: String, required: true },
+    // --- INFORMATIONS GÉNÉRALES ---
+    name: {
+      type: String,
+      required: [true, 'Le nom est obligatoire'],
+      trim: true,
+      minlength: [3, 'Le nom doit faire au moins 3 caractères'],
+      maxlength: [100, 'Le nom ne peut pas dépasser 100 caractères'],
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    type: {
+      type: String,
+      enum: ['hotel', 'guesthouse', 'auberge', 'apartment', 'campement', 'gite'],
+      required: [true, 'Le type est obligatoire'],
+    },
+    description: {
+      type: String,
+      required: [true, 'La description est obligatoire'],
+      minlength: [10, 'La description doit faire au moins 10 caractères'],
+    },
+
+    // --- MÉDIAS ---
     logo: { type: String },
     banner: { type: String },
-    images: [{ public_id: String, secure_url: String }],
-    address: { type: String, required: true },
-    city: { type: String, default: 'Kpalimé' },
-    district: { type: String },
-    phone: { type: String, required: true },
-    email: { type: String },
-    whatsapp: { type: String },
-    gpsLat: { type: Number },
-    gpsLng: { type: Number },
-    amenities: [{ type: String }],
-    checkInTime: { type: String, default: '14:00' },
-    checkOutTime: { type: String, default: '11:00' },
-    isFeatured: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true },
+    images: [
+      {
+        public_id: { type: String, required: true },
+        secure_url: { type: String, required: true },
+      },
+    ],
 
-    // --- NOUVEAUX CHAMPS (intégrés correctement dans le schéma) ---
-    status: { 
-      type: String, 
-      enum: ['draft', 'pending', 'needs_correction', 'approved', 'rejected', 'suspended'],
-      default: 'draft'
+    // --- LOCALISATION ---
+    address: {
+      type: String,
+      required: [true, 'L\'adresse est obligatoire'],
     },
-    ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    ownerName: { type: String, required: true },
-    region: { type: String, required: true },
+    city: {
+      type: String,
+      required: [true, 'La ville est obligatoire'],
+    },
+    district: { type: String },
+    region: {
+      type: String,
+      enum: ['Maritime', 'Plateaux', 'Centrale', 'Kara', 'Savanes'],
+      required: [true, 'La région est obligatoire'],
+    },
     prefecture: { type: String },
     landmark: { type: String },
+    gpsLat: { type: Number, min: -90, max: 90 },
+    gpsLng: { type: Number, min: -180, max: 180 },
+
+    // --- CONTACT ---
+    phone: {
+      type: String,
+      required: [true, 'Le téléphone est obligatoire'],
+    },
+    email: {
+      type: String,
+      match: [/^\S+@\S+\.\S+$/, 'Email invalide'],
+    },
+    whatsapp: { type: String },
     website: { type: String },
     socialMedia: {
       facebook: { type: String },
       instagram: { type: String },
       twitter: { type: String },
     },
+
+    // --- CAPACITÉ ET TARIFS ---
+    capacity: {
+      type: Number,
+      required: true,
+      min: [1, 'La capacité doit être au moins 1'],
+    },
+    roomsCount: {
+      type: Number,
+      required: true,
+      min: [1, 'Le nombre de chambres doit être au moins 1'],
+    },
     priceRange: { type: String },
-    currency: { type: String, default: 'XOF' },
-    capacity: { type: Number, default: 0 },
-    roomsCount: { type: Number, default: 0 },
+    currency: {
+      type: String,
+      enum: ['XOF', 'EUR', 'USD'],
+      default: 'XOF',
+    },
+
+    // --- ÉQUIPEMENTS ---
+    amenities: [{ type: String }],
+    checkInTime: { type: String, default: '14:00' },
+    checkOutTime: { type: String, default: '11:00' },
+
+    // --- PROPRIÉTAIRE ---
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'L\'ID du propriétaire est obligatoire'],
+    },
+    ownerName: {
+      type: String,
+      required: [true, 'Le nom du propriétaire est obligatoire'],
+    },
+
+    // --- STATUT ET VALIDATION ---
+    status: {
+      type: String,
+      enum: ['draft', 'pending', 'approved', 'rejected', 'needs_correction', 'suspended'],
+      default: 'draft',
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
     publishedAt: { type: Date },
+
+    // --- NOTES ADMIN ---
     adminNote: { type: String },
     rejectionReason: { type: String },
     correctionRequest: { type: String },
-    documents: [{ 
-      public_id: { type: String }, 
-      secure_url: { type: String },
-      type: { type: String },
-      uploadedAt: { type: Date }
-    }],
-    verificationConfirmed: { type: Boolean, default: false },
+
+    // --- DOCUMENTS JUSTIFICATIFS ---
+    documents: [
+      {
+        public_id: { type: String, required: true },
+        secure_url: { type: String, required: true },
+        type: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    // --- VÉRIFICATION ---
+    verificationConfirmed: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true, // Ajoute createdAt et updatedAt automatiquement
+  }
 );
 
-// Index pour optimiser les recherches
-schema.index({ slug: 1 });
-schema.index({ type: 1, isFeatured: -1 });
-schema.index({ status: 1, region: 1 }); // Nouvel index pour filtrer par statut et région
-schema.index({ ownerId: 1 }); // Nouvel index pour retrouver les établissements d'un propriétaire
+// ============================================
+// INDEX POUR OPTIMISER LES REQUÊTES
+// ============================================
 
-export const Accommodation: Model<IAccommodation> = mongoose.models.Accommodation || mongoose.model<IAccommodation>('Accommodation', schema);
+// Index unique sur le slug
+AccommodationSchema.index({ slug: 1 }, { unique: true });
+
+// Index composé pour filtrer par statut et région (très utilisé)
+AccommodationSchema.index({ status: 1, region: 1 });
+
+// Index pour retrouver les établissements d'un propriétaire
+AccommodationSchema.index({ ownerId: 1 });
+
+// Index pour les recherches par type et statut
+AccommodationSchema.index({ type: 1, status: 1 });
+
+// Index pour les établissements en vedette
+AccommodationSchema.index({ isFeatured: -1, status: 1 });
+
+// Index texte pour la recherche full-text
+AccommodationSchema.index({ 
+  name: 'text', 
+  description: 'text', 
+  city: 'text' 
+});
+
+// ============================================
+// MÉTHODES STATIQUES (optionnel)
+// ============================================
+
+AccommodationSchema.statics.findBySlug = async function(slug: string) {
+  return this.findOne({ slug, status: 'approved', isActive: true });
+};
+
+AccommodationSchema.statics.findByOwner = async function(ownerId: string) {
+  return this.find({ ownerId }).sort({ createdAt: -1 });
+};
+
+AccommodationSchema.statics.findPending = async function() {
+  return this.find({ status: 'pending' }).sort({ createdAt: -1 });
+};
+
+// ============================================
+// EXPORT DU MODÈLE
+// ============================================
+
+export const Accommodation: Model<IAccommodation> =
+  mongoose.models.Accommodation ||
+  mongoose.model<IAccommodation>('Accommodation', AccommodationSchema);

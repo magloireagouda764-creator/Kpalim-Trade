@@ -1,284 +1,370 @@
-import { Types } from 'mongoose';
+import mongoose from 'mongoose';
 import { Accommodation } from '@/models/Accommodation';
-import { ACCOMMODATION_LIMITS } from '@/lib/config';
-import {
-  IAccommodation,
-  AccommodationType,
-  AccommodationStatus,
-  TogoRegion,
-  AccommodationFilters,
-  AccommodationFormData,
+import { 
+  IAccommodation, 
+  ICreateAccommodation, 
+  IUpdateAccommodation, 
+  IValidateAccommodation,
+  IAccommodationFilters,
+  IDashboardStats 
 } from '@/types/accommodation';
 
 // ============================================
-// GÉNÉRATION DE SLUG UNIQUE
+// FONCTIONS UTILITAIRES
 // ============================================
+
+/**
+ * Génère un slug unique à partir du nom
+ * Ex: "Hôtel du Littoral" -> "hotel-du-littoral"
+ */
 function generateSlug(name: string): string {
-  const base = name
+  const baseSlug = name
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .substring(0, 50);
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Enlève les accents
+    .replace(/[^a-z0-9\s-]/g, '') // Enlève les caractères spéciaux
+    .replace(/\s+/g, '-') // Remplace les espaces par des tirets
+    .replace(/-+/g, '-') // Enlève les tirets multiples
+    .trim();
 
-  return base;
-}
-
-async function getUniqueSlug(name: string): Promise<string> {
-  const baseSlug = generateSlug(name);
-  let slug = baseSlug;
-  let counter = 1;
-
-  while (await Accommodation.exists({ slug })) {
-    slug = `${baseSlug}-${counter}`;
-    counter++;
-  }
-
-  return slug;
+  // Ajoute un suffixe aléatoire si le slug existe déjà
+  const randomSuffix = Math.random().toString(36).substring(2, 7);
+  return `${baseSlug}-${randomSuffix}`;
 }
 
 // ============================================
-// VÉRIFICATION DES LIMITES DE CAPACITÉ
+// CRÉATION
 // ============================================
-async function checkCapacityLimit(type: AccommodationType): Promise<{ allowed: boolean; error?: string }> {
-  const currentHotels = await Accommodation.countDocuments({
-    type: 'hotel',
-    status: 'approved',
-    isActive: true,
-  });
 
-  const currentGuesthouses = await Accommodation.countDocuments({
-    type: { $ne: 'hotel' },
-    status: 'approved',
-    isActive: true,
-  });
-
-  if (type === 'hotel' && currentHotels >= ACCOMMODATION_LIMITS.hotels) {
-    return {
-      allowed: false,
-      error: `La capacité maximale d'hôtels (${ACCOMMODATION_LIMITS.hotels}) est atteinte.`,
-    };
-  }
-
-  if (type !== 'hotel' && currentGuesthouses >= ACCOMMODATION_LIMITS.guesthouses) {
-    return {
-      allowed: false,
-      error: `La capacité maximale d'hébergements (${ACCOMMODATION_LIMITS.guesthouses}) est atteinte.`,
-    };
-  }
-
-  return { allowed: true };
-}
-
-// ============================================
-// CRÉER UNE NOUVELLE FICHE (BROUILLON)
-// ============================================
 export async function createAccommodation(
-  data: AccommodationFormData,
-  ownerId: string,
-  ownerName: string
+  data: ICreateAccommodation
 ): Promise<{ success: boolean; data?: IAccommodation; error?: string }> {
   try {
-    // Vérifier la limite de capacité
-    const capacityCheck = await checkCapacityLimit(data.type);
-    if (!capacityCheck.allowed) {
-      return { success: false, error: capacityCheck.error };
+    // Vérifier si l'ownerId est valide
+    if (!mongoose.Types.ObjectId.isValid(data.ownerId)) {
+      return { success: false, error: 'ID du propriétaire invalide' };
     }
 
     // Générer un slug unique
-    const slug = await getUniqueSlug(data.name);
+    const slug = generateSlug(data.name);
 
-    // Créer la fiche en brouillon
-    const accommodation = await Accommodation.create({
+    // Créer l'établissement avec le statut 'pending' par défaut
+    const accommodation = new Accommodation({
       ...data,
       slug,
-      ownerId: new Types.ObjectId(ownerId),
-      ownerName,
-      status: 'draft',
-      isActive: true,
+      status: 'pending',
+      isActive: false,
       isFeatured: false,
-      currency: data.currency || 'XOF',
-      images: data.images || [],
-      documents: [],
-      verificationConfirmed: data.verificationConfirmed || false,
+      ownerId: new mongoose.Types.ObjectId(data.ownerId),
     });
 
-    return { success: true, data: accommodation as unknown as IAccommodation };
+    await accommodation.save();
+
+    return { success: true, data: accommodation };
   } catch (error: any) {
-    console.error('Erreur création accommodation:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la création de la fiche',
-    };
+    console.error('❌ Erreur création établissement:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
   }
 }
 
 // ============================================
-// METTRE À JOUR UNE FICHE
+// MISE À JOUR
 // ============================================
+
 export async function updateAccommodation(
   id: string,
-  data: Partial<AccommodationFormData>,
-  ownerId: string
+  data: IUpdateAccommodation
 ): Promise<{ success: boolean; data?: IAccommodation; error?: string }> {
   try {
-    // Vérifier que la fiche existe et appartient au propriétaire
-    const existing = await Accommodation.findOne({
-      _id: new Types.ObjectId(id),
-      ownerId: new Types.ObjectId(ownerId),
-    });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: 'ID invalide' };
+    }
 
+    // Vérifier que l'établissement existe
+    const existing = await Accommodation.findById(id);
     if (!existing) {
-      return {
-        success: false,
-        error: 'Fiche non trouvée ou vous n\'êtes pas autorisé à la modifier',
+      return { success: false, error: 'Établissement non trouvé' };
+    }
+
+    // Ne permettre la modification que si le statut est 'draft' ou 'needs_correction'
+    if (existing.status === 'approved' || existing.status === 'pending') {
+      return { 
+        success: false, 
+        error: 'Impossible de modifier un établissement validé ou en attente' 
       };
     }
 
-    // Si la fiche était approuvée et qu'on modifie des infos importantes,
-    // la repasser en "needs_correction"
-    const importantFields = ['name', 'type', 'address', 'phone', 'images'];
-    const hasImportantChanges = importantFields.some(
-      (field) => data[field as keyof AccommodationFormData] !== undefined
-    );
-
-    const updateData: any = { ...data };
-
-    if (existing.status === 'approved' && hasImportantChanges) {
-      updateData.status = 'pending';
-      updateData.publishedAt = undefined;
-    }
-
+    // Mettre à jour les champs
     const updated = await Accommodation.findByIdAndUpdate(
       id,
-      { $set: updateData },
+      { $set: data },
       { new: true, runValidators: true }
     );
 
-    return { success: true, data: updated as unknown as IAccommodation };
+    return { success: true, data: updated };
   } catch (error: any) {
-    console.error('Erreur mise à jour accommodation:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la mise à jour',
-    };
+    console.error('❌ Erreur mise à jour:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
   }
 }
 
 // ============================================
-// SOUMETTRE POUR VALIDATION
+// SUPPRESSION
 // ============================================
+
+export async function deleteAccommodation(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: 'ID invalide' };
+    }
+
+    const deleted = await Accommodation.findByIdAndDelete(id);
+    if (!deleted) {
+      return { success: false, error: 'Établissement non trouvé' };
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('❌ Erreur suppression:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
+  }
+}
+
+// ============================================
+// RÉCUPÉRATION PAR ID
+// ============================================
+
+export async function getAccommodationById(
+  id: string
+): Promise<{ success: boolean; data?: IAccommodation; error?: string }> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: 'ID invalide' };
+    }
+
+    const accommodation = await Accommodation.findById(id);
+    if (!accommodation) {
+      return { success: false, error: 'Établissement non trouvé' };
+    }
+
+    return { success: true, data: accommodation };
+  } catch (error: any) {
+    console.error('❌ Erreur récupération:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
+  }
+}
+
+// ============================================
+// RÉCUPÉRATION PAR PROPRIÉTAIRE (Dashboard)
+// ============================================
+
+export async function getOwnerAccommodations(
+  ownerId: string,
+  status?: string
+): Promise<{ success: boolean; data?: IAccommodation[]; error?: string }> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      return { success: false, error: 'ID du propriétaire invalide' };
+    }
+
+    const query: any = { ownerId: new mongoose.Types.ObjectId(ownerId) };
+    
+    // Filtrer par statut si fourni
+    if (status) {
+      query.status = status;
+    }
+
+    const accommodations = await Accommodation.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return { success: true, data: accommodations };
+  } catch (error: any) {
+    console.error('❌ Erreur récupération propriétaire:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
+  }
+}
+
+// ============================================
+// RÉCUPÉRATION POUR L'ADMIN (avec filtres)
+// ============================================
+
+export async function getAdminAccommodations(
+  filters: IAccommodationFilters
+): Promise<{ success: boolean; data?: IAccommodation[]; error?: string }> {
+  try {
+    const query: any = {};
+
+    // Appliquer les filtres
+    if (filters.status) query.status = filters.status;
+    if (filters.region) query.region = filters.region;
+    if (filters.type) query.type = filters.type;
+    if (filters.city) query.city = filters.city;
+
+    // Recherche textuelle
+    if (filters.search) {
+      query.$text = { $search: filters.search };
+    }
+
+    const accommodations = await Accommodation.find(query)
+      .sort({ createdAt: -1 })
+      .limit(filters.limit || 50)
+      .lean();
+
+    return { success: true, data: accommodations };
+  } catch (error: any) {
+    console.error('❌ Erreur récupération admin:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
+  }
+}
+
+// ============================================
+// STATISTIQUES DASHBOARD
+// ============================================
+
+export async function getDashboardStats(
+  ownerId: string
+): Promise<{ success: boolean; data?: IDashboardStats; error?: string }> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      return { success: false, error: 'ID du propriétaire invalide' };
+    }
+
+    const stats = await Accommodation.aggregate([
+      { $match: { ownerId: new mongoose.Types.ObjectId(ownerId) } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Construire l'objet de statistiques
+    const result: IDashboardStats = {
+      total: 0,
+      draft: 0,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      needs_correction: 0,
+      suspended: 0,
+    };
+
+    stats.forEach((stat: any) => {
+      result[stat._id as keyof IDashboardStats] = stat.count;
+      result.total += stat.count;
+    });
+
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error('❌ Erreur statistiques:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
+  }
+}
+
+// ============================================
+// SOUMISSION POUR VALIDATION
+// ============================================
+
 export async function submitForValidation(
   id: string,
   ownerId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const accommodation = await Accommodation.findOne({
-      _id: new Types.ObjectId(id),
-      ownerId: new Types.ObjectId(ownerId),
-    });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: 'ID invalide' };
+    }
 
+    const accommodation = await Accommodation.findById(id);
     if (!accommodation) {
-      return { success: false, error: 'Fiche non trouvée' };
+      return { success: false, error: 'Établissement non trouvé' };
     }
 
+    // Vérifier que le propriétaire est bien le créateur
+    if (accommodation.ownerId.toString() !== ownerId) {
+      return { success: false, error: 'Non autorisé' };
+    }
+
+    // Vérifier que le statut permet la soumission
     if (accommodation.status !== 'draft' && accommodation.status !== 'needs_correction') {
-      return {
-        success: false,
-        error: 'Seules les fiches en brouillon ou à corriger peuvent être soumises',
+      return { 
+        success: false, 
+        error: 'Cet établissement ne peut pas être soumis pour validation' 
       };
     }
 
-    // Vérifications minimales avant soumission
-    if (!accommodation.name || !accommodation.description || !accommodation.phone) {
-      return {
-        success: false,
-        error: 'Veuillez remplir au moins le nom, la description et le téléphone',
-      };
-    }
-
+    // Passer en statut 'pending'
     accommodation.status = 'pending';
     await accommodation.save();
 
     return { success: true };
   } catch (error: any) {
-    console.error('Erreur soumission validation:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la soumission',
-    };
+    console.error('❌ Erreur soumission:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
   }
 }
 
 // ============================================
-// RÉCUPÉRER UNE FICHE PAR ID
+// VALIDATION PAR L'ADMIN
 // ============================================
-export async function getAccommodationById(
+
+export async function validateAccommodation(
   id: string,
-  options?: { includeDocuments?: boolean; includeOwner?: boolean }
-): Promise<{ success: boolean; data?: IAccommodation; error?: string }> {
+  validation: IValidateAccommodation
+): Promise<{ success: boolean; error?: string }> {
   try {
-    const query: any = { _id: new Types.ObjectId(id) };
-
-    let accommodation;
-    if (options?.includeDocuments) {
-      accommodation = await Accommodation.findOne(query);
-    } else {
-      // Exclure les documents privés par défaut
-      accommodation = await Accommodation.findOne(query).select('-documents');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, error: 'ID invalide' };
     }
 
-    if (!accommodation) {
-      return { success: false, error: 'Fiche non trouvée' };
-    }
-
-    return { success: true, data: accommodation as unknown as IAccommodation };
-  } catch (error: any) {
-    console.error('Erreur récupération accommodation:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la récupération',
-    };
-  }
-}
-
-// ============================================
-// RÉCUPÉRER UNE FICHE PAR SLUG (PUBLIC)
-// ============================================
-export async function getAccommodationBySlug(
-  slug: string
-): Promise<{ success: boolean; data?: IAccommodation; error?: string }> {
-  try {
-    const accommodation = await Accommodation.findOne({
-      slug,
-      status: 'approved',
-      isActive: true,
-    }).select('-documents -adminNote -rejectionReason -correctionRequest');
-
+    const accommodation = await Accommodation.findById(id);
     if (!accommodation) {
       return { success: false, error: 'Établissement non trouvé' };
     }
 
-    return { success: true, data: accommodation as unknown as IAccommodation };
+    // Vérifier que le statut est 'pending'
+    if (accommodation.status !== 'pending') {
+      return { 
+        success: false, 
+        error: 'Cet établissement n\'est pas en attente de validation' 
+      };
+    }
+
+    // Appliquer la décision
+    accommodation.status = validation.status;
+    
+    if (validation.adminNote) {
+      accommodation.adminNote = validation.adminNote;
+    }
+
+    if (validation.status === 'approved') {
+      accommodation.isActive = true;
+      accommodation.publishedAt = new Date();
+    } else if (validation.status === 'rejected') {
+      accommodation.rejectionReason = validation.rejectionReason || 'Non spécifié';
+    } else if (validation.status === 'needs_correction') {
+      accommodation.correctionRequest = validation.correctionRequest || 'Corrections demandées';
+    }
+
+    await accommodation.save();
+
+    return { success: true };
   } catch (error: any) {
-    console.error('Erreur récupération par slug:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la récupération',
-    };
+    console.error('❌ Erreur validation:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
   }
 }
 
 // ============================================
-// LISTE PUBLIQUE (fiches approuvées uniquement)
+// RÉCUPÉRATION PUBLIQUE (pour les visiteurs)
 // ============================================
+
 export async function getPublicAccommodations(
-  filters: AccommodationFilters
-): Promise<{
-  success: boolean;
-  data?: IAccommodation[];
-  pagination?: any;
-  error?: string;
-}> {
+  filters: IAccommodationFilters
+): Promise<{ success: boolean; data?: IAccommodation[]; error?: string }> {
   try {
     const query: any = {
       status: 'approved',
@@ -289,175 +375,14 @@ export async function getPublicAccommodations(
     if (filters.type) query.type = filters.type;
     if (filters.city) query.city = filters.city;
 
-    if (filters.search) {
-      query.$or = [
-        { name: { $regex: filters.search, $options: 'i' } },
-        { description: { $regex: filters.search, $options: 'i' } },
-        { city: { $regex: filters.search, $options: 'i' } },
-      ];
-    }
+    const accommodations = await Accommodation.find(query)
+      .sort({ isFeatured: -1, createdAt: -1 })
+      .limit(filters.limit || 20)
+      .lean();
 
-    if (filters.amenities && filters.amenities.length > 0) {
-      query.amenities = { $in: filters.amenities };
-    }
-
-    const page = filters.page || 1;
-    const limit = filters.limit || 20;
-    const skip = (page - 1) * limit;
-
-    const [data, total] = await Promise.all([
-      Accommodation.find(query)
-        .select('-documents -adminNote -rejectionReason -correctionRequest -ownerId')
-        .sort({ isFeatured: -1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Accommodation.countDocuments(query),
-    ]);
-
-    return {
-      success: true,
-      data: data as unknown as IAccommodation[],
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return { success: true, data: accommodations };
   } catch (error: any) {
-    console.error('Erreur liste publique:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la récupération',
-    };
-  }
-}
-
-// ============================================
-// LISTE POUR LE PROPRIÉTAIRE (ses fiches)
-// ============================================
-export async function getOwnerAccommodations(
-  ownerId: string,
-  status?: AccommodationStatus
-): Promise<{ success: boolean; data?: IAccommodation[]; error?: string }> {
-  try {
-    const query: any = { ownerId: new Types.ObjectId(ownerId) };
-    if (status) query.status = status;
-
-    const data = await Accommodation.find(query)
-      .select('-documents')
-      .sort({ updatedAt: -1 });
-
-    return { success: true, data: data as unknown as IAccommodation[] };
-  } catch (error: any) {
-    console.error('Erreur liste propriétaire:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la récupération',
-    };
-  }
-}
-
-// ============================================
-// LISTE ADMIN (toutes les fiches)
-// ============================================
-export async function getAdminAccommodations(
-  filters: { status?: AccommodationStatus; region?: TogoRegion; type?: AccommodationType }
-): Promise<{ success: boolean; data?: IAccommodation[]; error?: string }> {
-  try {
-    const query: any = {};
-    if (filters.status) query.status = filters.status;
-    if (filters.region) query.region = filters.region;
-    if (filters.type) query.type = filters.type;
-
-    const data = await Accommodation.find(query)
-      .sort({ createdAt: -1 });
-
-    return { success: true, data: data as unknown as IAccommodation[] };
-  } catch (error: any) {
-    console.error('Erreur liste admin:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la récupération',
-    };
-  }
-}
-
-// ============================================
-// ACTIONS ADMIN : APPROUVER / REFUSER / SUSPENDRE
-// ============================================
-export async function adminUpdateStatus(
-  id: string,
-  status: AccommodationStatus,
-  adminNote?: string,
-  rejectionReason?: string,
-  correctionRequest?: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const updateData: any = {
-      status,
-      adminNote: adminNote || undefined,
-      rejectionReason: rejectionReason || undefined,
-      correctionRequest: correctionRequest || undefined,
-    };
-
-    if (status === 'approved') {
-      updateData.publishedAt = new Date();
-      updateData.isActive = true;
-    }
-
-    const result = await Accommodation.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!result) {
-      return { success: false, error: 'Fiche non trouvée' };
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Erreur action admin:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de l\'action admin',
-    };
-  }
-}
-
-// ============================================
-// SUPPRIMER UNE FICHE
-// ============================================
-export async function deleteAccommodation(
-  id: string,
-  ownerId: string,
-  isAdmin: boolean = false
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const query: any = { _id: new Types.ObjectId(id) };
-
-    // Si pas admin, vérifier la propriété
-    if (!isAdmin) {
-      query.ownerId = new Types.ObjectId(ownerId);
-    }
-
-    const result = await Accommodation.findOneAndDelete(query);
-
-    if (!result) {
-      return {
-        success: false,
-        error: 'Fiche non trouvée ou vous n\'êtes pas autorisé à la supprimer',
-      };
-    }
-
-    // TODO: Supprimer aussi les images Cloudinary associées
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Erreur suppression accommodation:', error);
-    return {
-      success: false,
-      error: error.message || 'Erreur lors de la suppression',
-    };
+    console.error('❌ Erreur récupération publique:', error);
+    return { success: false, error: error.message || 'Erreur serveur' };
   }
 }

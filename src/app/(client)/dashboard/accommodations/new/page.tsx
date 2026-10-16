@@ -48,7 +48,7 @@ export default function NewAccommodationPage() {
     ownerName: "",
     phone: "",
     email: "",
-    region: "Maritime", // Par défaut
+    region: "Maritime",
     city: "",
     district: "",
     address: "",
@@ -96,8 +96,7 @@ export default function NewAccommodationPage() {
     try {
       const payload = { 
         ...formData, 
-        ownerId: "674f3b8e9c8d4e001f8b4567", // À remplacer par l'ID réel de l'utilisateur connecté via l'auth
-        ownerName: formData.ownerName 
+        ownerId: "674f3b8e9c8d4e001f8b4567", // TODO: Remplacer par l'ID réel
       };
       
       const res = await fetch("/api/accommodations", {
@@ -109,10 +108,10 @@ export default function NewAccommodationPage() {
       const data = await res.json();
 
       if (data.success) {
-        // ✅ REDIRECTION IMMÉDIATE VERS LA PAGE D'ATTENTE AVEC LA RÉGION
+        // Redirection vers la page d'attente avec la région
         router.push(`/dashboard/accommodations/pending?region=${formData.region}`);
       } else {
-        setError(data.error || "Une erreur est survenue lors de la création.");
+        setError(data.error || "Une erreur est survenue.");
       }
     } catch (err) {
       console.error(err);
