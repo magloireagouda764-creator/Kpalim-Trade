@@ -94,40 +94,21 @@ export async function updateAccommodation(
       };
     }
 
-    // Mettre à jour les champs
+    // Mettre à jour les champs avec .lean() pour retourner un objet JS simple
     const updated = await Accommodation.findByIdAndUpdate(
       id,
       { $set: data },
       { new: true, runValidators: true }
-    );
+    ).lean();
+
+    // Vérification explicite pour TypeScript
+    if (!updated) {
+      return { success: false, error: 'Établissement non trouvé après mise à jour' };
+    }
 
     return { success: true, data: updated };
   } catch (error: any) {
     console.error('❌ Erreur mise à jour:', error);
-    return { success: false, error: error.message || 'Erreur serveur' };
-  }
-}
-
-// ============================================
-// SUPPRESSION
-// ============================================
-
-export async function deleteAccommodation(
-  id: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return { success: false, error: 'ID invalide' };
-    }
-
-    const deleted = await Accommodation.findByIdAndDelete(id);
-    if (!deleted) {
-      return { success: false, error: 'Établissement non trouvé' };
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('❌ Erreur suppression:', error);
     return { success: false, error: error.message || 'Erreur serveur' };
   }
 }
