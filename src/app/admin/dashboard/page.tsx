@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { connectDB } from '@/lib/mongodb';
-import User from '@/models/User';
-import Shop from '@/models/Shop';
-import Product from '@/models/Product';
-import Accommodation from '@/models/Accommodation';
-import Restaurant from '@/models/Restaurant';
-import { Users, Store, Package, Hotel, UtensilsCrossed, Clock, Bell, CheckCircle, AlertTriangle } from 'lucide-react';
+import { User } from '@/models/User';
+import { Shop } from '@/models/Shop';
+import { Product } from '@/models/Product';
+import { Accommodation } from '@/models/Accommodation';
+import { Restaurant } from '@/models/Restaurant';
+import { Users, Store, Package, Hotel, UtensilsCrossed, Clock, Bell, AlertTriangle } from 'lucide-react';
 
 async function DashboardStats() {
   await connectDB();
@@ -29,8 +29,8 @@ async function DashboardStats() {
     Restaurant.countDocuments(),
     Shop.countDocuments({ status: 'pending' }),
     Product.countDocuments({ status: 'pending' }),
-    Accommodation.countDocuments({ status: 'pending' }), // Assure-toi que ce statut existe dans ton modèle
-    Restaurant.countDocuments({ status: 'pending' }),   // Assure-toi que ce statut existe dans ton modèle
+    Accommodation.countDocuments({ status: 'pending' }),
+    Restaurant.countDocuments({ status: 'pending' }),
   ]);
 
   const stats = [
@@ -121,7 +121,7 @@ async function DashboardStats() {
         })}
       </div>
 
-      {/* Section pour les actions rapides (à développer ensuite) */}
+      {/* Section pour les actions rapides */}
       <div className="mt-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
         <div className="flex flex-wrap gap-3">
