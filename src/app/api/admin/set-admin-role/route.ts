@@ -2,14 +2,15 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { User } from '@/models/User';
 
-export async function POST(request: Request) {
+// On ajoute la méthode GET pour pouvoir le faire via un simple lien cliquable
+export async function GET(request: Request) {
   try {
     await connectDB();
-    const body = await request.json();
-    const { email } = body;
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
 
     if (!email) {
-      return NextResponse.json({ error: 'Email requis' }, { status: 400 });
+      return NextResponse.json({ error: 'Email requis dans l\'URL (ex: ?email=ton@email.com)' }, { status: 400 });
     }
 
     const user = await User.findOneAndUpdate(
@@ -19,12 +20,12 @@ export async function POST(request: Request) {
     );
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
+      return NextResponse.json({ error: 'Utilisateur non trouvé avec cet email' }, { status: 404 });
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: `Rôle de ${user.name} changé en admin`,
+      message: `Succès ! Le rôle de ${user.name} est maintenant "admin". Tu peux te reconnecter.`,
       user: { name: user.name, email: user.email, role: user.role }
     });
   } catch (error) {
