@@ -1,62 +1,114 @@
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
+'use client';
 
-export default async function DebugRolePage() {
-  const cookieStore = await cookies();
-  
-  // Essayer plusieurs noms de cookies possibles
-  const token = 
-    cookieStore.get('_vercel_jwt')?.value ||
-    cookieStore.get('kpalime_token')?.value ||
-    cookieStore.get('token')?.value ||
-    cookieStore.get('auth-token')?.value;
-  
-  let role = 'non connecté';
-  let email = 'N/A';
-  let tokenName = 'Aucun';
-  let tokenPresent = 'NON';
-  let tokenPreview = 'N/A';
-  
-  if (token) {
-    tokenPresent = 'OUI';
-    tokenPreview = token.substring(0, 30) + '...';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function DebugRolePage() {
+  const [tokenInfo, setTokenInfo] = useState({
+    tokenPresent: 'NON',
+    tokenSource: 'Aucun',
+    tokenPreview: 'N/A',
+    role: 'non connecté',
+    email: 'N/A'
+  });
+  const router = useRouter();
+
+  useEffect(() => {
+    // Vérifier localStorage
+    const localStorageToken = localStorage.getItem('token') || 
+                              localStorage.getItem('kpalime_token') ||
+                              localStorage.getItem('auth_token');
     
-    // Déterminer quel cookie a été trouvé
-    if (cookieStore.get('_vercel_jwt')?.value) tokenName = '_vercel_jwt';
-    else if (cookieStore.get('kpalime_token')?.value) tokenName = 'kpalime_token';
-    else if (cookieStore.get('token')?.value) tokenName = 'token';
-    else tokenName = 'autre';
-    
-    const payload = verifyToken(token);
-    if (payload) {
-      role = payload.role || 'inconnu';
-      email = payload.email || 'N/A';
-    } else {
-      role = 'token invalide';
+    // Vérifier sessionStorage
+    const sessionStorageToken = sessionStorage.getItem('token') ||
+                                sessionStorage.getItem('kpalime_token');
+
+    let token = localStorageToken || sessionStorageToken;
+    let tokenSource = 'Aucun';
+
+    if (localStorageToken) {
+      tokenSource = 'localStorage';
+      token = localStorageToken;
+    } else if (sessionStorageToken) {
+      tokenSource = 'sessionStorage';
+      token = sessionStorageToken;
     }
-  }
-  
+
+    if (token) {
+      // Décoder le JWT (partie payload)
+      try {
+        const payloadBase64 = token.split('.')[1];
+        const payloadJson = atob(payloadBase64);
+        const payload = JSON.parse(payloadJson);
+        
+        setTokenInfo({
+          tokenPresent: 'OUI',
+          tokenSource: tokenSource,
+          tokenPreview: token.substring(0, 30) + '...',
+          role: payload.role || 'inconnu',
+          email: payload.email || 'N/A'
+        });
+      } catch (error) {
+        setTokenInfo(prev => ({
+          ...prev,
+          tokenPresent: 'OUI (invalide)',
+          tokenSource: tokenSource,
+          tokenPreview: token.substring(0, 30) + '...'
+        }));
+      }
+    }
+  }, []);
+
   return (
     <div style={{ padding: '2rem', fontFamily: 'monospace', background: '#1a1a1a', color: '#00ff00', minHeight: '100vh' }}>
       <h1>🔍 Debug Rôle Utilisateur</h1>
       <hr style={{ borderColor: '#333' }} />
-      <p><strong>Token présent :</strong> {tokenPresent}</p>
-      <p><strong>Nom du cookie :</strong> {tokenName}</p>
-      <p><strong>Token (début) :</strong> {tokenPreview}</p>
-      <p><strong>Email :</strong> {email}</p>
-      <p><strong>Rôle actuel :</strong> <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{role}</span></p>
+      <p><strong>Token présent :</strong> {tokenInfo.tokenPresent}</p>
+      <p><strong>Source du token :</strong> {tokenInfo.tokenSource}</p>
+      <p><strong>Token (début) :</strong> {tokenInfo.tokenPreview}</p>
+      <p><strong>Email :</strong> {tokenInfo.email}</p>
+      <p><strong>Rôle actuel :</strong> <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{tokenInfo.role}</span></p>
       <hr style={{ borderColor: '#333' }} />
-      {role === 'admin' ? (
+      {tokenInfo.role === 'admin' ? (
         <div style={{ background: '#004400', padding: '1rem', borderRadius: '8px' }}>
-          <p>✅ Tu es ADMIN ! Tu devrais pouvoir accéder à /admin/dashboard</p>
-          <a href="/admin/dashboard" style={{ color: '#00ff00', fontSize: '1.2rem' }}>→ Cliquer ici pour aller au dashboard admin</a>
+          <p>✅ Tu es ADMIN !</p>
+          <button 
+            onClick={() => router.push('/admin/dashboard')}
+            style={{ background: '#00ff00', color: '#000', padding: '0.5rem 1rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' }}
+          >
+            → Aller au dashboard admin
+          </button>
         </div>
       ) : (
         <div style={{ background: '#440000', padding: '1rem', borderRadius: '8px' }}>
-          <p>❌ Ton rôle n'est PAS admin. C'est pour ça que tu es redirigé.</p>
-          <p>Rôle actuel : <strong>{role}</strong></p>
+          <p>❌ Ton rôle n'est PAS admin.</p>
+          <p>Rôle actuel : <strong>{tokenInfo.role}</strong></p>
         </div>
       )}
+      <hr style={{ borderColor: '#333', marginTop: '2rem' }} />
+      <h3>🔧 Actions rapides</h3>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <button 
+          onClick={() => {
+            const allLocalStorage = Object.keys(localStorage).map(key => `${key}: ${localStorage.getItem(key)?.substring(0, 50)}`).join('\n');
+            alert('localStorage:\n' + allLocalStorage);
+          }}
+          style={{ background: '#333', color: '#fff', padding: '0.5rem 1rem', border: '1px solid #555', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          Voir tout le localStorage
+        </button>
+        <button 
+          onClick={() => {
+            localStorage.clear();
+            sessionStorage.clear();
+            alert('Stockage vidé ! Recharge la page.');
+            window.location.reload();
+          }}
+          style={{ background: '#660000', color: '#fff', padding: '0.5rem 1rem', border: '1px solid #990000', borderRadius: '4px', cursor: 'pointer' }}
+        >
+          Vider tout le stockage
+        </button>
+      </div>
     </div>
   );
 }
