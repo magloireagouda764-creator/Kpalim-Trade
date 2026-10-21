@@ -1,7 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getTokenFromCookie, verifyToken } from '@/lib/auth';
-import { connectDB } from '@/lib/mongodb';
-import { User } from '@/models/User';
 
 const ADMIN_ROUTES = ['/admin'];
 const AUTH_ROUTES = ['/auth/login', '/auth/register'];
@@ -11,33 +9,24 @@ export async function middleware(request: NextRequest) {
   const token = await getTokenFromCookie();
   const payload = token ? verifyToken(token) : null;
 
-  // Si pas de token et route protégée → login
+  // 1. Si pas de token et route protégée → rediriger vers login
   if (!payload && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
     return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
   }
 
-  // Si connecté et route auth → dashboard
+  // 2. Si déjà connecté et essaie d'aller sur login/register → rediriger vers dashboard
   if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Pour les routes ADMIN : vérifier le rôle dans la DB (pas dans le token)
+  // 3. Pour les routes ADMIN : vérifier que le rôle dans le token est 'admin'
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!payload) {
-      return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
-    }
-
-    try {
-      await connectDB();
-      const user = await User.findById(payload.userId).select('role').lean();
-      
-      if (!user || user.role !== 'admin') {
-        return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
-      }
-      return NextResponse.next();
-    } catch (error) {
+    if (!payload || payload.role !== 'admin') {
+      // Pas admin → rediriger vers l'espace propriétaire
       return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
     }
+    // Est admin → laisser passer
+    return NextResponse.next();
   }
 
   return NextResponse.next();
