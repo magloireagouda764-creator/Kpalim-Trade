@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 
-export default function DebugRolePage() {
-  const cookieStore = cookies();
+export default async function DebugRolePage() {
+  const cookieStore = await cookies();
   const token = cookieStore.get('kpalime_token')?.value;
   
   let role = 'non connecté';
