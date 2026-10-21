@@ -1,40 +1,42 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { verifyToken, getTokenFromCookie } from '@/lib/auth';
+import { getTokenFromCookie, verifyToken } from '@/lib/auth';
+import { connectDB } from '@/lib/mongodb';
+import { User } from '@/models/User';
 
-const CLIENT_ROUTES = ['/dashboard', '/orders', '/profile', '/addresses', '/favorites', '/notifications'];
-const VENDOR_ROUTES = ['/vendor'];
 const ADMIN_ROUTES = ['/admin'];
 const AUTH_ROUTES = ['/auth/login', '/auth/register'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = await getTokenFromCookie();
-  const payload = token ? await verifyToken(token) : null;
+  const payload = token ? verifyToken(token) : null;
 
-  // ✅ TEMPORAIRE : Autoriser l'accès au formulaire d'hébergement sans connexion pour les tests
-  if (pathname.startsWith('/dashboard/accommodations')) {
-    return NextResponse.next();
+  // Si pas de token et route protégée → login
+  if (!payload && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
+    return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
   }
 
+  // Si connecté et route auth → dashboard
   if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  if (CLIENT_ROUTES.some((r) => pathname.startsWith(r)) && !payload) {
-    return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
-  }
-
-  if (VENDOR_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!payload) return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
-    if (payload.role !== 'vendor' && payload.role !== 'admin' && payload.role !== 'accommodation_owner') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
-
+  // Pour les routes ADMIN : vérifier le rôle dans la DB (pas dans le token)
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (!payload) return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
-    if (payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (!payload) {
+      return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
+    }
+
+    try {
+      await connectDB();
+      const user = await User.findById(payload.userId).select('role').lean();
+      
+      if (!user || user.role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
+      }
+      return NextResponse.next();
+    } catch (error) {
+      return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
     }
   }
 
@@ -44,12 +46,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
-    '/orders/:path*',
-    '/profile/:path*',
-    '/addresses/:path*',
-    '/favorites/:path*',
-    '/notifications/:path*',
-    '/vendor/:path*',
     '/admin/:path*',
     '/auth/login',
     '/auth/register',
