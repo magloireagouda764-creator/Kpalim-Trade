@@ -19,9 +19,14 @@ export function verifyToken(token: string): any {
 }
 
 // 3. Récupérer le token depuis les cookies (côté serveur)
+// ✅ CORRIGÉ : Cherche _vercel_jwt en premier, puis kpalime_token, puis token
 export async function getTokenFromCookie(): Promise<string | undefined> {
   const cookieStore = await cookies();
-  return cookieStore.get('kpalime_token')?.value;
+  return (
+    cookieStore.get('_vercel_jwt')?.value ||
+    cookieStore.get('kpalime_token')?.value ||
+    cookieStore.get('token')?.value
+  );
 }
 
 // 4. Récupérer l'utilisateur actuel (côté serveur)
