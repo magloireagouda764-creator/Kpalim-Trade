@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getTokenFromCookie } from '@/lib/auth';
-import { verifyToken } from '@/lib/jwt';
+import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
@@ -13,7 +12,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const payload = await verifyToken(token);
+    const payload = verifyToken(token);
     
     if (!payload) {
       return NextResponse.json({ 
