@@ -9,12 +9,17 @@ export async function middleware(request: NextRequest) {
   const token = await getTokenFromCookie();
   const payload = token ? verifyToken(token) : null;
 
-  // 1. Si pas de token et route protégée → rediriger vers login
+  // ✅ EXCEPTION : laisser passer la page force-admin sans redirection
+  if (pathname.startsWith('/force-admin')) {
+    return NextResponse.next();
+  }
+
+  // 1. Si pas de token et route protégée → login
   if (!payload && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
     return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
   }
 
-  // 2. Si déjà connecté et essaie d'aller sur login/register → rediriger selon le rôle
+  // 2. Si connecté et route auth → dashboard selon rôle
   if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     if (payload.role === 'admin') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
@@ -22,15 +27,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
   }
 
-  // 3. Pour les routes ADMIN : vérifier que le rôle est 'admin'
+  // 3. Routes ADMIN : vérifier le rôle
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
     if (!payload || payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
+      return NextResponse.redirect(new URL('/force-admin', request.url));
     }
     return NextResponse.next();
   }
 
-  // 4. Si accès à /dashboard sans sous-page → rediriger selon le rôle
+  // 4. /dashboard sans sous-page → rediriger selon rôle
   if (pathname === '/dashboard') {
     if (payload?.role === 'admin') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
@@ -47,5 +52,6 @@ export const config = {
     '/admin/:path*',
     '/auth/login',
     '/auth/register',
+    '/force-admin',
   ],
 };
