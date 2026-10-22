@@ -1,51 +1,58 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { User } from '@/models/User';
 import { verifyPassword, createToken } from '@/lib/auth';
-import { loginSchema } from '@/lib/validators';
+import { cookies } from 'next/headers';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
-    const parsed = loginSchema.safeParse(body);
+    const { email, password } = await request.json();
 
-    if (!parsed.success) {
-      return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 });
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email et mot de passe requis' }, { status: 400 });
     }
 
     await connectDB();
 
-    const user = await User.findOne({ email: parsed.data.email }).select('+password');
-    if (!user || !user.isActive) {
-      return NextResponse.json({ success: false, error: 'Identifiants incorrects' }, { status: 401 });
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 });
     }
 
-    const valid = await verifyPassword(parsed.data.password, user.password);
-    if (!valid) {
-      return NextResponse.json({ success: false, error: 'Identifiants incorrects' }, { status: 401 });
+    const isValid = await verifyPassword(password, user.password);
+
+    if (!isValid) {
+      return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 });
     }
 
-    const token = await createToken({
-      userId: user._id.toString(),
-      role: user.role,
+    // Créer un token avec le rôle ACTUEL de la DB
+    const token = createToken({
+      userId: user._id,
       email: user.email,
+      role: user.role,
+      name: user.name
     });
 
-    const response = NextResponse.json({
-      success: true,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, avatar: user.avatar },
-    });
-
-    response.cookies.set('kpalime_token', token, {
+    // Définir le cookie
+    const cookieStore = await cookies();
+    cookieStore.set('_vercel_jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 3600,
-      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/'
     });
 
-    return response;
-  } catch {
-    return NextResponse.json({ success: false, error: 'Erreur serveur' }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
