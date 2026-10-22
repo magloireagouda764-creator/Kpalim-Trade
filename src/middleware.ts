@@ -14,19 +14,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
   }
 
-  // 2. Si déjà connecté et essaie d'aller sur login/register → rediriger vers dashboard
+  // 2. Si déjà connecté et essaie d'aller sur login/register → rediriger selon le rôle
   if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (payload.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
+    return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
   }
 
-  // 3. Pour les routes ADMIN : vérifier que le rôle dans le token est 'admin'
+  // 3. Pour les routes ADMIN : vérifier que le rôle est 'admin'
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
     if (!payload || payload.role !== 'admin') {
-      // Pas admin → rediriger vers l'espace propriétaire
       return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
     }
-    // Est admin → laisser passer
     return NextResponse.next();
+  }
+
+  // 4. Si accès à /dashboard sans sous-page → rediriger selon le rôle
+  if (pathname === '/dashboard') {
+    if (payload?.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
+    return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
   }
 
   return NextResponse.next();
