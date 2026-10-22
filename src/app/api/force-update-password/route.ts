@@ -5,38 +5,45 @@ import { hashPassword } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const { email, newPassword } = await request.json();
+    const body = await request.json();
+    const { email, newPassword } = body;
+
+    if (!email || !newPassword) {
+      return NextResponse.json(
+        { error: 'Email et nouveau mot de passe requis', success: false },
+        { status: 400 }
+      );
+    }
 
     await connectDB();
 
-    // Hacher le mot de passe
+    // 1. Hacher le mot de passe
     const hashedPassword = await hashPassword(newPassword);
 
-    // Forcer la mise à jour avec findOneAndUpdate
-    const result = await User.findOneAndUpdate(
+    // 2. Mettre à jour l'utilisateur et récupérer le résultat
+    const updatedUser = await User.findOneAndUpdate(
       { email: email.toLowerCase().trim() },
       { $set: { password: hashedPassword } },
       { new: true }
     );
 
-    if (!result) {
+    // 3. Vérification stricte pour TypeScript
+    if (!updatedUser) {
       return NextResponse.json(
         { error: 'Utilisateur non trouvé', success: false },
         { status: 404 }
       );
     }
 
-    // Vérifier que le mot de passe est bien sauvegardé
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    
+    // 4. Ici, TypeScript sait que updatedUser n'est PAS null
     return NextResponse.json({
       success: true,
       message: 'Mot de passe forcé avec succès',
       user: {
-        email: user.email,
-        role: user.role,
-        hasPassword: !!user.password,
-        passwordLength: user.password?.length || 0
+        email: updatedUser.email,
+        role: updatedUser.role,
+        hasPassword: !!updatedUser.password,
+        passwordLength: updatedUser.password ? updatedUser.password.length : 0
       }
     });
   } catch (error: any) {
