@@ -18,7 +18,8 @@ export async function POST(request: Request) {
 
     await connectDB();
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    // ✅ CORRECTION CRITIQUE : .select('+password') pour contourner le 'select: false' du schéma
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (!user) {
       return NextResponse.json(

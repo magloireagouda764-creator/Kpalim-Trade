@@ -20,14 +20,15 @@ export async function POST(request: Request) {
     // 1. Hacher le mot de passe
     const hashedPassword = await hashPassword(newPassword);
 
-    // 2. Mettre à jour l'utilisateur et récupérer le résultat
-    const updatedUser = await User.findOneAndUpdate(
+    // 2. Mettre à jour l'utilisateur
+    await User.findOneAndUpdate(
       { email: email.toLowerCase().trim() },
-      { $set: { password: hashedPassword } },
-      { new: true }
+      { $set: { password: hashedPassword } }
     );
 
-    // 3. Vérification stricte pour TypeScript
+    // 3. ✅ CORRECTION CRITIQUE : .select('+password') pour vérifier qu'il est bien là
+    const updatedUser = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+
     if (!updatedUser) {
       return NextResponse.json(
         { error: 'Utilisateur non trouvé', success: false },
@@ -35,7 +36,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Ici, TypeScript sait que updatedUser n'est PAS null
     return NextResponse.json({
       success: true,
       message: 'Mot de passe forcé avec succès',
