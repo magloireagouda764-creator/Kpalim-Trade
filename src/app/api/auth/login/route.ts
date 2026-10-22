@@ -6,32 +6,42 @@ import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const body = await request.json();
+    const { email, password } = body;
 
     if (!email || !password) {
-      return NextResponse.json({ error: 'Email et mot de passe requis' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Email et mot de passe requis' },
+        { status: 400 }
+      );
     }
 
     await connectDB();
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user) {
-      return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Email ou mot de passe incorrect' },
+        { status: 401 }
+      );
     }
 
     const isValid = await verifyPassword(password, user.password);
 
     if (!isValid) {
-      return NextResponse.json({ error: 'Email ou mot de passe incorrect' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Email ou mot de passe incorrect' },
+        { status: 401 }
+      );
     }
 
     // Créer un token avec le rôle ACTUEL de la DB
     const token = createToken({
-      userId: user._id,
+      userId: user._id.toString(),
       email: user.email,
-      role: user.role,
-      name: user.name
+      role: user.role || 'client',
+      name: user.name || user.email
     });
 
     // Définir le cookie
@@ -40,19 +50,24 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 7 jours
       path: '/'
     });
 
     return NextResponse.json({
       success: true,
       user: {
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role || 'client'
       }
     });
-  } catch (error) {
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Erreur login:', error);
+    return NextResponse.json(
+      { error: 'Erreur serveur: ' + (error.message || 'inconnue') },
+      { status: 500 }
+    );
   }
 }
