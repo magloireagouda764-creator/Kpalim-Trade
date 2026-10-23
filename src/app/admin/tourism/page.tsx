@@ -1,76 +1,102 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
 import { connectDB } from '@/lib/mongodb';
-import { TouristSite } from '@/models/TouristSite';
-import { Badge } from '@/components/ui/Badge';
+import { TourismSite } from '@/models/TourismSite';
+import { AdminListPage } from '@/components/admin/AdminListPage';
+import { Palmtree } from 'lucide-react';
+import Link from 'next/link';
 
-export const metadata: Metadata = { title: 'Gestion Tourisme' };
+export const metadata = { title: 'Administration Tourisme | Kpalimé-Trade' };
 
-export default async function AdminTourismPage() {
+export default async function AdminTourismPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; region?: string; search?: string }>;
+}) {
   await connectDB();
+  const sp = await searchParams;
 
-  const sitesData = await TouristSite.find().sort({ name: 1 }).lean();
-  const sites = sitesData as any[];
+  const query: any = {};
+  if (sp.status) query.status = sp.status;
+  else query.status = 'pending';
+  if (sp.region) query.region = sp.region;
+  if (sp.search) query.$text = { $search: sp.search };
+
+  const [items, allStats] = await Promise.all([
+    TourismSite.find(query).sort({ createdAt: -1 }).lean(),
+    TourismSite.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+  ]);
+
+  const stats: Record<string, number> = {};
+  allStats.forEach((s: any) => { stats[s._id] = s.count; });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-900 text-green-300 border-green-700';
+      case 'rejected': return 'bg-red-900 text-red-300 border-red-700';
+      case 'needs_correction': return 'bg-orange-900 text-orange-300 border-orange-700';
+      default: return 'bg-yellow-900 text-yellow-300 border-yellow-700';
+    }
+  };
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'approved': return 'Approuvé';
+      case 'rejected': return 'Refusé';
+      case 'needs_correction': return 'À corriger';
+      default: return 'En attente';
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Gestion Tourisme</h1>
-
-      <div className="overflow-x-auto rounded-xl border border-gray-100">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 text-gray-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Site</th>
-              <th className="px-4 py-3 font-medium">Catégorie</th>
-              <th className="px-4 py-3 font-medium">Ville</th>
-              <th className="px-4 py-3 font-medium">Vedette</th>
-              <th className="px-4 py-3 font-medium">Actif</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {sites.map((s: any) => (
-              <tr key={s._id?.toString()} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded overflow-hidden bg-gray-100 relative shrink-0">
-                      <Image
-                        src={s.images?.[0]?.secure_url || '/placeholder.jpg'}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="32px"
-                      />
-                    </div>
-                    <span className="font-medium">{s.name}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-gray-500 capitalize">
-                  {s.category}
-                </td>
-                <td className="px-4 py-3 text-gray-500">{s.city}</td>
-                <td className="px-4 py-3">{s.isFeatured ? '⭐' : ''}</td>
-                <td className="px-4 py-3">
-                  <Badge
-                    className={
-                      s.isActive
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }
-                  >
-                    {s.isActive ? 'Actif' : 'Inactif'}
-                  </Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {sites.length === 0 && (
-          <p className="text-center py-12 text-gray-400">
-            Aucun site touristique
-          </p>
-        )}
-      </div>
-    </div>
+    <AdminListPage
+      title="Administration Tourisme & Sites"
+      subtitle="Valider, refuser ou demander des corrections"
+      stats={stats}
+      statLabels={[
+        { key: 'pending', label: 'En attente', color: 'bg-yellow-900/30 text-yellow-300 border-yellow-700' },
+        { key: 'approved', label: 'Approuvés', color: 'bg-green-900/30 text-green-300 border-green-700' },
+        { key: 'rejected', label: 'Refusés', color: 'bg-red-900/30 text-red-300 border-red-700' },
+        { key: 'needs_correction', label: 'À corriger', color: 'bg-orange-900/30 text-orange-300 border-orange-700' },
+      ]}
+      searchPlaceholder="Rechercher par nom, type, ville..."
+      items={items}
+      searchParams={sp}
+      basePath="/admin/tourism"
+      filterByRegion={true}
+      renderItem={(item: any) => (
+        <div key={item._id} className="rounded-lg border border-gray-700 bg-gray-800 p-6 hover:border-gray-600 transition-colors">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <h3 className="text-lg font-bold text-white">{item.name}</h3>
+                <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(item.status)}`}>
+                  {getStatusLabel(item.status)}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-gray-400 flex-wrap">
+                <span className="flex items-center gap-1"><Palmtree size={14} /> {item.type}</span>
+                <span>•</span>
+                <span>{item.city}, {item.region}</span>
+                <span>•</span>
+                <span>Propriétaire: {item.ownerName || 'Inconnu'}</span>
+              </div>
+              {item.status === 'rejected' && item.rejectionReason && (
+                <div className="mt-2 p-2 bg-red-900/20 border border-red-700 rounded text-xs text-red-300">
+                  <strong>Motif du refus :</strong> {item.rejectionReason}
+                </div>
+              )}
+              {item.status === 'needs_correction' && item.correctionRequest && (
+                <div className="mt-2 p-2 bg-orange-900/20 border border-orange-700 rounded text-xs text-orange-300">
+                  <strong>Corrections demandées :</strong> {item.correctionRequest}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href={`/admin/tourism/${item._id}/review`} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition-colors text-sm">
+                <Eye size={16} /> Review
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    />
   );
 }

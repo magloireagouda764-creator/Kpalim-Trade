@@ -3,30 +3,36 @@ import mongoose, { Schema, Model } from 'mongoose';
 export interface IReport {
   _id: mongoose.Types.ObjectId;
   reporterId: mongoose.Types.ObjectId;
-  reportableType: 'product' | 'shop' | 'user' | 'review' | 'event' | 'professional';
-  reportableId: mongoose.Types.ObjectId;
+  reporterName: string;
+  targetType: 'user' | 'product' | 'establishment' | 'post' | 'review';
+  targetId: mongoose.Types.ObjectId;
   reason: string;
-  details?: string;
-  status: 'new' | 'investigating' | 'resolved' | 'dismissed';
-  resolvedBy?: mongoose.Types.ObjectId;
-  resolvedAt?: Date;
+  description: string;
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+  resolution?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const schema = new Schema<IReport>(
   {
     reporterId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    reportableType: { type: String, enum: ['product', 'shop', 'user', 'review', 'event', 'professional'], required: true },
-    reportableId: { type: Schema.Types.ObjectId, required: true },
+    reporterName: { type: String, required: true },
+    targetType: { type: String, enum: ['user', 'product', 'establishment', 'post', 'review'], required: true },
+    targetId: { type: Schema.Types.ObjectId, required: true },
     reason: { type: String, required: true },
-    details: { type: String },
-    status: { type: String, enum: ['new', 'investigating', 'resolved', 'dismissed'], default: 'new' },
-    resolvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    resolvedAt: { type: Date },
+    description: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ['pending', 'reviewed', 'resolved', 'dismissed'],
+      default: 'pending'
+    },
+    resolution: { type: String },
   },
   { timestamps: true }
 );
 
-schema.index({ status: 1, createdAt: -1 });
-schema.index({ reportableType: 1, reportableId: 1 });
+schema.index({ status: 1 });
+schema.index({ targetType: 1 });
 
 export const Report: Model<IReport> = mongoose.models.Report || mongoose.model<IReport>('Report', schema);

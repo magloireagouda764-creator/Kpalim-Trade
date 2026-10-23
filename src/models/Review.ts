@@ -2,28 +2,39 @@ import mongoose, { Schema, Model } from 'mongoose';
 
 export interface IReview {
   _id: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
-  reviewableType: 'product' | 'shop' | 'hotel' | 'restaurant' | 'guide' | 'professional';
-  reviewableId: mongoose.Types.ObjectId;
+  authorId: mongoose.Types.ObjectId;
+  authorName: string;
+  targetType: 'product' | 'establishment' | 'service';
+  targetId: mongoose.Types.ObjectId;
+  targetName: string;
   rating: number;
   comment: string;
-  status: 'visible' | 'hidden' | 'reported';
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const schema = new Schema<IReview>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    reviewableType: { type: String, enum: ['product', 'shop', 'hotel', 'restaurant', 'guide', 'professional'], required: true },
-    reviewableId: { type: Schema.Types.ObjectId, required: true },
-    rating: { type: Number, required: true, min: 1, max: 5 },
-    comment: { type: String, required: true, maxlength: 1000 },
-    status: { type: String, enum: ['visible', 'hidden', 'reported'], default: 'visible' },
+    authorId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    authorName: { type: String, required: true },
+    targetType: { type: String, enum: ['product', 'establishment', 'service'], required: true },
+    targetId: { type: Schema.Types.ObjectId, required: true },
+    targetName: { type: String, required: true },
+    rating: { type: Number, min: 1, max: 5, required: true },
+    comment: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    rejectionReason: { type: String },
   },
   { timestamps: true }
 );
 
-// Un utilisateur ne peut laisser qu'un avis par entité
-schema.index({ userId: 1, reviewableType: 1, reviewableId: 1 }, { unique: true });
-schema.index({ reviewableType: 1, reviewableId: 1, status: 1 });
+schema.index({ status: 1 });
+schema.index({ targetType: 1 });
 
 export const Review: Model<IReview> = mongoose.models.Review || mongoose.model<IReview>('Review', schema);
