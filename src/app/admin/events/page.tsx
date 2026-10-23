@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { Event } from '@/models/Event';
 import { AdminListPage } from '@/components/admin/AdminListPage';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Eye } from 'lucide-react'; // ✅ Eye ajouté ici
 import Link from 'next/link';
 
 export const metadata = { title: 'Administration Événements | Kpalimé-Trade' };
