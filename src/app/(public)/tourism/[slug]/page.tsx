@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { connectDB } from '@/lib/mongodb';
-import { TouristSite } from '@/models/TourismSite';
+import { TourismSite } from '@/models/TourismSite';
 import { Price } from '@/components/currency/Price';
 
 interface Props { params: Promise<{ slug: string }> }
@@ -11,15 +11,15 @@ interface Props { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   await connectDB();
-  const site = await TouristSite.findOne({ slug, isActive: true }).lean();
+  const site = await TourismSite.findOne({ slug, isActive: true }).lean();
   if (!site) return { title: 'Site introuvable' };
   return { title: site.name, description: site.shortDescription };
 }
 
-export default async function TouristSitePage({ params }: Props) {
+export default async function TourismSitePage({ params }: Props) {
   const { slug } = await params;
   await connectDB();
-  const site = await TouristSite.findOne({ slug, isActive: true }).lean();
+  const site = await TourismSite.findOne({ slug, isActive: true }).lean();
   if (!site) notFound();
 
   const s = JSON.parse(JSON.stringify(site));
@@ -69,7 +69,7 @@ export default async function TouristSitePage({ params }: Props) {
             {s.duration && <div><p className="text-xs text-gray-500">Durée recommandée</p><p className="text-sm">{s.duration}</p></div>}
             {s.difficulty && <div><p className="text-xs text-gray-500">Difficulté</p><p className="text-sm capitalize">{s.difficulty === 'easy' ? 'Facile' : s.difficulty === 'medium' ? 'Moyenne' : 'Difficile'}</p></div>}
             {s.bestPeriod && <div><p className="text-xs text-gray-500">Meilleure période</p><p className="text-sm">{s.bestPeriod}</p></div>}
-            {s.contactPhone && <div><p className="text-xs text-gray-500">Contact</p><a href={`tel:${s.contactPhone}`} className="text-sm text-kpalime-green font-medium hover:underline">📞 {s.contactPhone}</a></div>}
+            {s.contactPhone && <div><p className="text-xs text-gray-500">Contact</p><a href={`tel:${s.contactPhone}`} className="text-sm text-kpalime-green font-medium hover:underline"> {s.contactPhone}</a></div>}
           </div>
         </div>
       </div>

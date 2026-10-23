@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/mongodb';
 import { Product } from '@/models/Product';
 import { Shop } from '@/models/Shop';
-import { TouristSite } from '@/models/TourismSite';
+import { TourismSite } from '@/models/TourismSite';
 import { Restaurant } from '@/models/Restaurant';
 import { Event } from '@/models/Event';
 
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [productsData, shopsData, sitesData, restaurantsData, eventsData] = await Promise.all([
       Product.find({ status: 'active' }).select('slug updatedAt').lean(),
       Shop.find({ status: 'approved' }).select('slug updatedAt').lean(),
-      TouristSite.find({ isActive: true }).select('slug updatedAt').lean(),
+      TourismSite.find({ isActive: true }).select('slug updatedAt').lean(),
       Restaurant.find({ isActive: true }).select('slug updatedAt').lean(),
       Event.find({ status: 'published' }).select('slug updatedAt').lean(),
     ]);

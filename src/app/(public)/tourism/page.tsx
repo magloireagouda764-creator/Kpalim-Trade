@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { connectDB } from '@/lib/mongodb';
-import { TouristSite } from '@/models/TourismSite';
+import { TourismSite } from '@/models/TourismSite';
 import { SiteCard } from '@/components/tourism/SiteCard';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Tourisme à Kpalimé', description: 
 
 async function TourismContent() {
   await connectDB();
-  const sites = await TouristSite.find({ isActive: true }).sort({ isFeatured: -1, name: 1 }).lean();
+  const sites = await TourismSite.find({ isActive: true }).sort({ isFeatured: -1, name: 1 }).lean();
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
