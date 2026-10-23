@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { TourismSite } from '@/models/TourismSite';
 import { AdminListPage } from '@/components/admin/AdminListPage';
-import { Palmtree } from 'lucide-react';
+import { Palmtree, Eye } from 'lucide-react'; // ✅ Eye ajouté ici
 import Link from 'next/link';
 
 export const metadata = { title: 'Administration Tourisme | Kpalimé-Trade' };
