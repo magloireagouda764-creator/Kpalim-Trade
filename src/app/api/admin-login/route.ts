@@ -5,18 +5,13 @@ import { cookies } from 'next/headers';
 export async function POST(request: Request) {
   try {
     const { code } = await request.json();
-
-    // ✅ NOUVEAU CODE SECRET (change-le par ce que tu veux)
     const SECRET_ADMIN_CODE = '48574857';
 
     if (code !== SECRET_ADMIN_CODE) {
-      return NextResponse.json(
-        { error: 'Code incorrect' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Code incorrect' }, { status: 401 });
     }
 
-    // Créer un token admin
+    // 1. Créer le token admin
     const token = createToken({
       userId: 'admin-backdoor-id',
       email: 'magloireagouda764@gmail.com',
@@ -24,7 +19,7 @@ export async function POST(request: Request) {
       name: 'Admin Magloire'
     });
 
-    // Définir le cookie
+    // 2. Définir le cookie de manière sécurisée
     const cookieStore = await cookies();
     cookieStore.set('_vercel_jwt', token, {
       httpOnly: true,
@@ -34,14 +29,10 @@ export async function POST(request: Request) {
       path: '/'
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'Connexion admin réussie !'
-    });
+    // 3. ✅ REDIRECTION DIRECTE PAR LE SERVEUR (C'est ça qui empêche le clignotement)
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    
   } catch (error: any) {
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
