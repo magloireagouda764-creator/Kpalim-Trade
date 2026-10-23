@@ -7,11 +7,13 @@ export default function AdminLoginPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [debug, setDebug] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setDebug('');
     setLoading(true);
 
     try {
@@ -22,17 +24,23 @@ export default function AdminLoginPage() {
       });
 
       const data = await res.json();
+      setDebug(`Réponse API: ${JSON.stringify(data)}`);
 
       if (!res.ok) {
-        setError(data.error || 'Code incorrect');
+        setError(`❌ ${data.error || 'Code incorrect'}`);
         setLoading(false);
         return;
       }
 
-      // Succès ! Redirection vers le dashboard admin
-      router.push('/admin/dashboard');
-    } catch (err) {
-      setError('Erreur réseau. Réessaie.');
+      // Succès ! Vérifier que le cookie est bien défini
+      setDebug('✅ Connexion réussie ! Redirection vers /admin/dashboard...');
+      
+      // Attendre 1 seconde puis rediriger
+      setTimeout(() => {
+        window.location.href = '/admin/dashboard';
+      }, 1000);
+    } catch (err: any) {
+      setError(`❌ Erreur réseau: ${err.message}`);
       setLoading(false);
     }
   };
@@ -51,7 +59,7 @@ export default function AdminLoginPage() {
         padding: '2rem', 
         borderRadius: '8px',
         border: '1px solid #00ff00',
-        maxWidth: '400px',
+        maxWidth: '500px',
         width: '100%',
         textAlign: 'center'
       }}>
@@ -63,7 +71,7 @@ export default function AdminLoginPage() {
           🔑 Accès Admin Rapide
         </h1>
         <p style={{ color: '#888', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-          Entre le code à 8 chiffres pour accéder directement au tableau de bord.
+          Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
         {error && (
@@ -75,7 +83,22 @@ export default function AdminLoginPage() {
             marginBottom: '1rem',
             fontSize: '0.9rem'
           }}>
-            ❌ {error}
+            {error}
+          </div>
+        )}
+
+        {debug && (
+          <div style={{ 
+            background: '#001144', 
+            color: '#00ffff', 
+            padding: '0.75rem', 
+            borderRadius: '4px',
+            marginBottom: '1rem',
+            fontSize: '0.85rem',
+            textAlign: 'left',
+            wordBreak: 'break-all'
+          }}>
+            {debug}
           </div>
         )}
 
@@ -97,7 +120,8 @@ export default function AdminLoginPage() {
               textAlign: 'center',
               letterSpacing: '0.5rem',
               marginBottom: '1.5rem',
-              outline: 'none'
+              outline: 'none',
+              boxSizing: 'border-box'
             }}
             placeholder="00000000"
           />
