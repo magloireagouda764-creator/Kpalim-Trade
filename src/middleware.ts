@@ -1,35 +1,32 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
-const AUTH_ROUTES = ['/auth/login', '/auth/register'];
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = await getTokenFromCookie();
   const payload = token ? verifyToken(token) : null;
 
-  // 1. Si pas de token et route protégée → rediriger vers admin-login
+  // 1. Routes publiques (laisser passer tout le monde)
+  if (pathname === '/' || pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  // 2. Si PAS connecté et route protégée → rediriger vers admin-login
   if (!payload && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
     return NextResponse.redirect(new URL('/admin-login', request.url));
   }
 
-  // 2. Si connecté et essaie d'aller sur login/register → rediriger selon rôle
-  if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    if (payload.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-    return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
-  }
-
-  // 3. Routes ADMIN : laisser passer si admin
-  if (pathname.startsWith('/admin')) {
-    if (!payload || payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/admin-login', request.url));
-    }
+  // 3. Si connecté et admin → laisser accéder à /admin/*
+  if (pathname.startsWith('/admin') && payload?.role === 'admin') {
     return NextResponse.next();
   }
 
-  // 4. /dashboard sans sous-page → rediriger selon rôle
+  // 4. Si connecté mais PAS admin → bloquer l'accès admin
+  if (pathname.startsWith('/admin') && payload?.role !== 'admin') {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  // 5. /dashboard sans sous-page → rediriger selon rôle
   if (pathname === '/dashboard') {
     if (payload?.role === 'admin') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
