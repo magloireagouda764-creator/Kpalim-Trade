@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [debug, setDebug] = useState('');
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +30,13 @@ export default function AdminLoginPage() {
         return;
       }
 
-      // Succès ! Vérifier que le cookie est bien défini
-      setDebug('✅ Connexion réussie ! Redirection vers /admin/dashboard...');
+      // Succès ! Redirection FORCÉE pour éviter les boucles
+      setDebug('✅ Connexion réussie ! Redirection en cours...');
       
-      // Attendre 1 seconde puis rediriger
       setTimeout(() => {
-        window.location.href = '/admin/dashboard';
-      }, 1000);
+        // window.location.replace force un vrai rechargement de la page
+        window.location.replace('/admin/dashboard');
+      }, 800);
     } catch (err: any) {
       setError(`❌ Erreur réseau: ${err.message}`);
       setLoading(false);

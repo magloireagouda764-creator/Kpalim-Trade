@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
-const ADMIN_ROUTES = ['/admin'];
 const AUTH_ROUTES = ['/auth/login', '/auth/register'];
 
 export async function middleware(request: NextRequest) {
@@ -9,17 +8,12 @@ export async function middleware(request: NextRequest) {
   const token = await getTokenFromCookie();
   const payload = token ? verifyToken(token) : null;
 
-  // ✅ EXCEPTION : laisser passer la page force-admin sans redirection
-  if (pathname.startsWith('/force-admin')) {
-    return NextResponse.next();
-  }
-
-  // 1. Si pas de token et route protégée → login
+  // 1. Si pas de token et route protégée → rediriger vers admin-login
   if (!payload && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
-    return NextResponse.redirect(new URL(`/auth/login?redirect=${pathname}`, request.url));
+    return NextResponse.redirect(new URL('/admin-login', request.url));
   }
 
-  // 2. Si connecté et route auth → dashboard selon rôle
+  // 2. Si connecté et essaie d'aller sur login/register → rediriger selon rôle
   if (payload && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     if (payload.role === 'admin') {
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
@@ -27,10 +21,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
   }
 
-  // 3. Routes ADMIN : vérifier le rôle
-  if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
+  // 3. Routes ADMIN : laisser passer si admin
+  if (pathname.startsWith('/admin')) {
     if (!payload || payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/force-admin', request.url));
+      return NextResponse.redirect(new URL('/admin-login', request.url));
     }
     return NextResponse.next();
   }
@@ -52,6 +46,5 @@ export const config = {
     '/admin/:path*',
     '/auth/login',
     '/auth/register',
-    '/force-admin',
   ],
 };
