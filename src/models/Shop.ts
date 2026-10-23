@@ -2,14 +2,16 @@ import mongoose, { Schema, Model } from 'mongoose';
 
 export interface IShop {
   _id: mongoose.Types.ObjectId;
+  slug: string;
   name: string;
   description: string;
+  logo?: string;
   type: string;
   region: string;
   city: string;
   ownerId: mongoose.Types.ObjectId;
   ownerName: string;
-  status: 'pending' | 'approved' | 'rejected' | 'needs_correction';
+  status: 'pending' | 'approved' | 'rejected' | 'needs_correction' | 'active';
   rejectionReason?: string;
   correctionRequest?: string;
   createdAt: Date;
@@ -18,8 +20,10 @@ export interface IShop {
 
 const schema = new Schema<IShop>(
   {
+    slug: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
+    logo: { type: String },
     type: { type: String, required: true },
     region: { type: String, required: true },
     city: { type: String, required: true },
@@ -27,7 +31,7 @@ const schema = new Schema<IShop>(
     ownerName: { type: String, required: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected', 'needs_correction'],
+      enum: ['pending', 'approved', 'rejected', 'needs_correction', 'active'],
       default: 'pending'
     },
     rejectionReason: { type: String },
@@ -38,5 +42,6 @@ const schema = new Schema<IShop>(
 
 schema.index({ status: 1 });
 schema.index({ region: 1 });
+schema.index({ slug: 1 });
 
 export const Shop: Model<IShop> = mongoose.models.Shop || mongoose.model<IShop>('Shop', schema);
