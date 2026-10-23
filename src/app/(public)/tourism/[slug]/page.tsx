@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { connectDB } from '@/lib/mongodb';
-import { TouristSite } from '@/models/TouristSite';
+import { TouristSite } from '@/models/TourismSite';
 import { Price } from '@/components/currency/Price';
 
 interface Props { params: Promise<{ slug: string }> }

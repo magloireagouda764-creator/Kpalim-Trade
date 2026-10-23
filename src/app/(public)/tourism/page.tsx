@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { connectDB } from '@/lib/mongodb';
-import { TouristSite } from '@/models/TouristSite';
+import { TouristSite } from '@/models/TourismSite';
 import { SiteCard } from '@/components/tourism/SiteCard';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
 

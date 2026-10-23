@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/mongodb';
 import { Product } from '@/models/Product';
 import { Shop } from '@/models/Shop';
-import { TouristSite } from '@/models/TouristSite';
+import { TouristSite } from '@/models/TourismSite';
 import { Restaurant } from '@/models/Restaurant';
 import { Event } from '@/models/Event';
 

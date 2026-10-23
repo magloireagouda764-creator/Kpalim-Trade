@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
-import { TouristSite } from '@/models/TouristSite';
+import { TouristSite } from '@/models/TourismSite';
 
 export async function GET() {
   try {
