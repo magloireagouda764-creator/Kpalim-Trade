@@ -11,15 +11,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Code incorrect' }, { status: 401 });
     }
 
-    // 1. Créer le token admin
+    // ✅ CORRECTION : Utiliser un faux ObjectId valide (24 caractères hex) pour éviter le crash Mongoose
     const token = createToken({
-      userId: 'admin-backdoor-id',
+      userId: '650000000000000000000001', 
       email: 'magloireagouda764@gmail.com',
       role: 'admin',
       name: 'Admin Magloire'
     });
 
-    // 2. Définir le cookie de manière sécurisée
     const cookieStore = await cookies();
     cookieStore.set('_vercel_jwt', token, {
       httpOnly: true,
@@ -29,7 +28,6 @@ export async function POST(request: Request) {
       path: '/'
     });
 
-    // 3. ✅ REDIRECTION DIRECTE PAR LE SERVEUR (C'est ça qui empêche le clignotement)
     return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     
   } catch (error: any) {

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Utensils, Eye, CheckCircle, Search } from 'lucide-react';
-import { connectDB } from '@/lib/mongodb'; // ✅ Utilise la fonction centrale fiable
+import { connectDB } from '@/lib/mongodb';
 import { Restaurant } from '@/models/Restaurant';
 
 export const metadata = {
@@ -15,12 +15,9 @@ export default async function AdminRestaurantsPage({
 }) {
   await connectDB();
   
-  // Next.js 15 : on doit attendre searchParams
   const resolvedSearchParams = await searchParams;
 
-  // Construire la requête avec filtres
   const query: any = {};
-  
   if (resolvedSearchParams.status) {
     query.status = resolvedSearchParams.status;
   } else {
@@ -35,11 +32,8 @@ export default async function AdminRestaurantsPage({
     query.$text = { $search: resolvedSearchParams.search };
   }
 
-  const restaurants = await Restaurant.find(query)
-    .sort({ createdAt: -1 })
-    .lean();
+  const restaurants = await Restaurant.find(query).sort({ createdAt: -1 }).lean();
 
-  // Statistiques globales
   const allStats = await Restaurant.aggregate([
     { $group: { _id: '$status', count: { $sum: 1 } } },
   ]);
@@ -49,7 +43,6 @@ export default async function AdminRestaurantsPage({
     stats[s._id] = s.count;
   });
 
-  // ✅ Helpers pour les badges (remplace le composant StatusBadge pour éviter les erreurs d'import)
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved': return 'bg-green-900 text-green-300 border-green-700';
@@ -70,13 +63,11 @@ export default async function AdminRestaurantsPage({
 
   return (
     <div className="p-6 max-w-7xl mx-auto text-gray-100">
-      {/* En-tête */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-green-400 mb-1">Administration des Restaurants</h1>
         <p className="text-gray-400 text-sm">Valider, refuser ou demander des corrections</p>
       </div>
 
-      {/* Statistiques rapides */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <StatCard label="En attente" value={stats.pending || 0} color="bg-yellow-900/30 text-yellow-300 border-yellow-700" active={resolvedSearchParams.status === 'pending' || !resolvedSearchParams.status} href="/admin/restaurants?status=pending" />
         <StatCard label="Approuvés" value={stats.approved || 0} color="bg-green-900/30 text-green-300 border-green-700" active={resolvedSearchParams.status === 'approved'} href="/admin/restaurants?status=approved" />
@@ -84,40 +75,26 @@ export default async function AdminRestaurantsPage({
         <StatCard label="À corriger" value={stats.needs_correction || 0} color="bg-orange-900/30 text-orange-300 border-orange-700" active={resolvedSearchParams.status === 'needs_correction'} href="/admin/restaurants?status=needs_correction" />
       </div>
 
-      {/* Barre de filtres */}
+      {/* ✅ CORRECTION : Le select est maintenant DANS le formulaire, plus de onChange illégal */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <form action="/admin/restaurants" method="GET" className="flex gap-2">
-              <input type="hidden" name="status" value={resolvedSearchParams.status || 'pending'} />
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  name="search"
-                  defaultValue={resolvedSearchParams.search}
-                  placeholder="Rechercher par nom, ville, cuisine..."
-                  className="w-full bg-gray-900 border border-gray-700 rounded-md pl-10 pr-4 py-2 text-white focus:border-green-500 focus:outline-none"
-                />
-              </div>
-              <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                Rechercher
-              </button>
-            </form>
+        <form action="/admin/restaurants" method="GET" className="flex flex-col md:flex-row gap-2">
+          <input type="hidden" name="status" value={resolvedSearchParams.status || 'pending'} />
+          
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              name="search"
+              defaultValue={resolvedSearchParams.search}
+              placeholder="Rechercher par nom, ville, cuisine..."
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pl-10 pr-4 py-2 text-white focus:border-green-500 focus:outline-none"
+            />
           </div>
 
           <select
+            name="region"
             defaultValue={resolvedSearchParams.region}
-            onChange={(e) => {
-              const url = new URL(window.location.href);
-              if (e.target.value) {
-                url.searchParams.set('region', e.target.value);
-              } else {
-                url.searchParams.delete('region');
-              }
-              window.location.href = url.toString();
-            }}
-            className="bg-gray-900 border border-gray-700 rounded-md px-4 py-2 text-white focus:border-green-500 focus:outline-none"
+            className="bg-gray-900 border border-gray-700 rounded-md px-4 py-2 text-white focus:border-green-500 focus:outline-none md:w-48"
           >
             <option value="">Toutes les régions</option>
             <option value="Maritime">Maritime</option>
@@ -126,18 +103,19 @@ export default async function AdminRestaurantsPage({
             <option value="Kara">Kara</option>
             <option value="Savanes">Savanes</option>
           </select>
-        </div>
+
+          <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+            Rechercher
+          </button>
+        </form>
       </div>
 
-      {/* Liste des restaurants */}
       {restaurants.length === 0 ? (
         <div className="text-center py-16 rounded-lg border border-gray-700 bg-gray-800">
           <CheckCircle size={48} className="text-green-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Aucun restaurant</h3>
           <p className="text-gray-400">
-            {resolvedSearchParams.status === 'pending' 
-              ? 'Aucun restaurant en attente de validation.' 
-              : 'Aucun résultat pour ces filtres.'}
+            {resolvedSearchParams.status === 'pending' ? 'Aucun restaurant en attente de validation.' : 'Aucun résultat pour ces filtres.'}
           </p>
         </div>
       ) : (
@@ -196,13 +174,8 @@ export default async function AdminRestaurantsPage({
   );
 }
 
-// Composant StatCard intégré pour éviter les erreurs d'import
 function StatCard({ label, value, color, active, href }: { 
-  label: string; 
-  value: number; 
-  color: string; 
-  active?: boolean;
-  href: string;
+  label: string; value: number; color: string; active?: boolean; href: string;
 }) {
   return (
     <Link 
