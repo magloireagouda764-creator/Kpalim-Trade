@@ -22,6 +22,8 @@ export default function SetupFinalPage() {
         });
 
         const resetData = await resetRes.json();
+        
+        // ✅ CORRECTION : On met à jour debug directement sans fonction fléchée
         setDebug({ reset: resetData });
 
         if (!resetRes.ok) {
@@ -42,7 +44,9 @@ export default function SetupFinalPage() {
         });
 
         const loginData = await loginRes.json();
-        setDebug(prev => ({ ...prev, login: loginData }));
+        
+        // ✅ CORRECTION : On met à jour l'objet complet directement
+        setDebug({ reset: resetData, login: loginData });
 
         if (!loginRes.ok) {
           setStatus(`❌ Échec étape 2: ${loginData.error}`);
@@ -88,7 +92,7 @@ export default function SetupFinalPage() {
           textAlign: 'center',
           fontSize: '1.5rem'
         }}>
-          ️ Configuration Finale
+          ⚙️ Configuration Finale
         </h1>
 
         <div style={{ 
