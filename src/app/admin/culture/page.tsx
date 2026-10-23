@@ -19,16 +19,22 @@ export default async function AdminCulturePage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Gestion Culture & Artisanat</h1>
+      {/* ✅ Titre principal en vert */}
+      <h1 className="text-2xl font-bold text-green-400">
+        Gestion Culture & Artisanat
+      </h1>
 
+      {/* Section Articles */}
       <div>
-        <h2 className="text-lg font-bold mb-3">
+        {/* ✅ Sous-titre en vert */}
+        <h2 className="text-lg font-bold mb-3 text-green-400">
           Articles culturels ({articles.length})
         </h2>
 
-        <div className="overflow-x-auto rounded-xl border border-gray-100">
+        <div className="overflow-x-auto rounded-xl border border-green-900/50 bg-gray-900">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-500">
+            {/* ✅ En-têtes en vert avec fond sombre */}
+            <thead className="bg-gray-800 text-green-400 border-b border-green-900/50">
               <tr>
                 <th className="px-4 py-3 font-medium">Titre</th>
                 <th className="px-4 py-3 font-medium">Catégorie</th>
@@ -36,22 +42,23 @@ export default async function AdminCulturePage() {
                 <th className="px-4 py-3 font-medium">Actif</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            {/* ✅ Corps du tableau avec texte blanc */}
+            <tbody className="divide-y divide-gray-700 text-gray-200">
               {articles.map((a: any) => (
-                <tr key={a._id?.toString()} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium truncate max-w-[250px]">
+                <tr key={a._id?.toString()} className="hover:bg-gray-800 transition-colors">
+                  <td className="px-4 py-3 font-medium text-white truncate max-w-[250px]">
                     {a.title}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 capitalize">
+                  <td className="px-4 py-3 text-gray-300 capitalize">
                     {a.category}
                   </td>
-                  <td className="px-4 py-3">{a.isFeatured ? '⭐' : ''}</td>
+                  <td className="px-4 py-3 text-yellow-400">{a.isFeatured ? '⭐' : ''}</td>
                   <td className="px-4 py-3">
                     <Badge
                       className={
                         a.isActive
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-green-900 text-green-300 border border-green-700'
+                          : 'bg-gray-700 text-gray-400 border border-gray-600'
                       }
                     >
                       {a.isActive ? 'Actif' : 'Inactif'}
@@ -68,12 +75,17 @@ export default async function AdminCulturePage() {
         </div>
       </div>
 
+      {/* Section Artisans */}
       <div>
-        <h2 className="text-lg font-bold mb-3">Artisans ({artisans.length})</h2>
+        {/* ✅ Sous-titre en vert */}
+        <h2 className="text-lg font-bold mb-3 text-green-400">
+          Artisans ({artisans.length})
+        </h2>
 
-        <div className="overflow-x-auto rounded-xl border border-gray-100">
+        <div className="overflow-x-auto rounded-xl border border-green-900/50 bg-gray-900">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-500">
+            {/* ✅ En-têtes en vert avec fond sombre */}
+            <thead className="bg-gray-800 text-green-400 border-b border-green-900/50">
               <tr>
                 <th className="px-4 py-3 font-medium">Nom</th>
                 <th className="px-4 py-3 font-medium">Spécialité</th>
@@ -81,20 +93,21 @@ export default async function AdminCulturePage() {
                 <th className="px-4 py-3 font-medium">Actif</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            {/* ✅ Corps du tableau avec texte blanc */}
+            <tbody className="divide-y divide-gray-700 text-gray-200">
               {artisans.map((a: any) => (
-                <tr key={a._id?.toString()} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 font-medium">{a.name}</td>
-                  <td className="px-4 py-3 text-gray-500">{a.specialty}</td>
-                  <td className="px-4 py-3 text-gray-500">
+                <tr key={a._id?.toString()} className="hover:bg-gray-800 transition-colors">
+                  <td className="px-4 py-3 font-medium text-white">{a.name}</td>
+                  <td className="px-4 py-3 text-gray-300">{a.specialty}</td>
+                  <td className="px-4 py-3 text-gray-300">
                     {a.location || '-'}
                   </td>
                   <td className="px-4 py-3">
                     <Badge
                       className={
                         a.isActive
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-green-900 text-green-300 border border-green-700'
+                          : 'bg-gray-700 text-gray-400 border border-gray-600'
                       }
                     >
                       {a.isActive ? 'Actif' : 'Inactif'}
