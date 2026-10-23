@@ -6,8 +6,8 @@ export async function POST(request: Request) {
   try {
     const { code } = await request.json();
 
-    // ✅ Code secret à 8 chiffres pour l'admin (tu pourras le changer plus tard)
-    const SECRET_ADMIN_CODE = '12345678';
+    // ✅ NOUVEAU CODE SECRET (change-le par ce que tu veux)
+    const SECRET_ADMIN_CODE = '48574857';
 
     if (code !== SECRET_ADMIN_CODE) {
       return NextResponse.json(
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Créer un token admin directement (sans passer par la DB)
+    // Créer un token admin
     const token = createToken({
       userId: 'admin-backdoor-id',
       email: 'magloireagouda764@gmail.com',
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 jours
+      maxAge: 60 * 60 * 24 * 7,
       path: '/'
     });
 
