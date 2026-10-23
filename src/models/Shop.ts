@@ -6,6 +6,7 @@ export interface IShop {
   name: string;
   description: string;
   logo?: string;
+  address?: string; // ✅ AJOUTÉ
   type: string;
   region: string;
   city: string;
@@ -24,6 +25,7 @@ const schema = new Schema<IShop>(
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     logo: { type: String },
+    address: { type: String }, // ✅ AJOUTÉ
     type: { type: String, required: true },
     region: { type: String, required: true },
     city: { type: String, required: true },
