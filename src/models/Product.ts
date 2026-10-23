@@ -7,13 +7,14 @@ export interface IProduct {
   description: string;
   category: string;
   price: number;
+  discountPrice?: number;
   region: string;
   ownerId: mongoose.Types.ObjectId;
   ownerName: string;
   status: 'pending' | 'approved' | 'rejected' | 'needs_correction' | 'active';
   rejectionReason?: string;
   correctionRequest?: string;
-  stock?: number;
+  stock: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,17 +26,18 @@ const schema = new Schema<IProduct>(
     description: { type: String, required: true },
     category: { type: String, required: true },
     price: { type: Number, required: true },
+    discountPrice: { type: Number },
     region: { type: String, required: true },
     ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     ownerName: { type: String, required: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected', 'needs_correction', 'active'], // ✅ 'active' ajouté ici
+      enum: ['pending', 'approved', 'rejected', 'needs_correction', 'active'],
       default: 'pending'
     },
     rejectionReason: { type: String },
     correctionRequest: { type: String },
-    stock: { type: Number, default: 0 }, // ✅ Ajouté car l'API le vérifie
+    stock: { type: Number, required: true, default: 0 }, // ✅ Obligatoire, donc plus d'erreur "undefined"
   },
   { timestamps: true }
 );
