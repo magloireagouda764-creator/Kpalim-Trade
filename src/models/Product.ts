@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 
 export interface IProduct {
   _id: mongoose.Types.ObjectId;
+  slug: string;
   name: string;
   description: string;
   category: string;
@@ -9,15 +10,17 @@ export interface IProduct {
   region: string;
   ownerId: mongoose.Types.ObjectId;
   ownerName: string;
-  status: 'pending' | 'approved' | 'rejected' | 'needs_correction';
+  status: 'pending' | 'approved' | 'rejected' | 'needs_correction' | 'active';
   rejectionReason?: string;
   correctionRequest?: string;
+  stock?: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const schema = new Schema<IProduct>(
   {
+    slug: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     category: { type: String, required: true },
@@ -27,11 +30,12 @@ const schema = new Schema<IProduct>(
     ownerName: { type: String, required: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected', 'needs_correction'],
+      enum: ['pending', 'approved', 'rejected', 'needs_correction', 'active'], // ✅ 'active' ajouté ici
       default: 'pending'
     },
     rejectionReason: { type: String },
     correctionRequest: { type: String },
+    stock: { type: Number, default: 0 }, // ✅ Ajouté car l'API le vérifie
   },
   { timestamps: true }
 );
