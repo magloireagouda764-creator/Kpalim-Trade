@@ -8,6 +8,7 @@ export interface IProduct {
   category: string;
   price: number;
   discountPrice?: number;
+  images?: Array<{ secure_url: string; public_id: string }>; // ✅ AJOUTÉ
   region: string;
   ownerId: mongoose.Types.ObjectId;
   ownerName: string;
@@ -27,6 +28,10 @@ const schema = new Schema<IProduct>(
     category: { type: String, required: true },
     price: { type: Number, required: true },
     discountPrice: { type: Number },
+    images: [{ // ✅ AJOUTÉ
+      secure_url: { type: String, required: true },
+      public_id: { type: String, required: true }
+    }],
     region: { type: String, required: true },
     ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     ownerName: { type: String, required: true },
@@ -37,7 +42,7 @@ const schema = new Schema<IProduct>(
     },
     rejectionReason: { type: String },
     correctionRequest: { type: String },
-    stock: { type: Number, required: true, default: 0 }, // ✅ Obligatoire, donc plus d'erreur "undefined"
+    stock: { type: Number, required: true, default: 0 },
   },
   { timestamps: true }
 );
