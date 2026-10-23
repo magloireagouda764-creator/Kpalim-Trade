@@ -2,9 +2,10 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/auth';
 
-export default function AdminDashboardPage() {
-  // Vérification côté serveur
-  const cookieStore = cookies();
+// ✅ Ajout de 'async' ici
+export default async function AdminDashboardPage() {
+  // ✅ Ajout de 'await' ici pour Next.js 15
+  const cookieStore = await cookies();
   const token = cookieStore.get('_vercel_jwt')?.value;
   
   if (!token) {
