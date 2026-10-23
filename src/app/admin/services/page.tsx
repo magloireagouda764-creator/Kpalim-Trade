@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { Service } from '@/models/Service';
 import { AdminListPage } from '@/components/admin/AdminListPage';
-import { Wrench } from 'lucide-react';
+import { Wrench, Eye } from 'lucide-react'; // ✅ Eye ajouté ici
 import Link from 'next/link';
 
 export const metadata = { title: 'Administration Services | Kpalimé-Trade' };

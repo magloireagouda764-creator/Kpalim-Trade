@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { Shop } from '@/models/Shop';
 import { AdminListPage } from '@/components/admin/AdminListPage';
-import { Store } from 'lucide-react';
+import { Store, Eye } from 'lucide-react'; // ✅ Eye ajouté ici
 import Link from 'next/link';
 
 export const metadata = { title: 'Administration Boutiques | Kpalimé-Trade' };

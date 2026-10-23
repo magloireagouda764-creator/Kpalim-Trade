@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { Product } from '@/models/Product';
 import { AdminListPage } from '@/components/admin/AdminListPage';
-import { Package } from 'lucide-react';
+import { Package, Eye } from 'lucide-react'; // ✅ Eye ajouté ici
 import Link from 'next/link';
 
 export const metadata = { title: 'Administration Produits | Kpalimé-Trade' };

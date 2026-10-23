@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import { Hotel } from '@/models/Hotel';
 import { AdminListPage } from '@/components/admin/AdminListPage';
-import { Hotel as HotelIcon } from 'lucide-react';
+import { Hotel as HotelIcon, Eye } from 'lucide-react'; // ✅ Eye ajouté ici
 import Link from 'next/link';
 
 export const metadata = { title: 'Administration Hôtels | Kpalimé-Trade' };
