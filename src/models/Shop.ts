@@ -6,7 +6,9 @@ export interface IShop {
   name: string;
   description: string;
   logo?: string;
-  address?: string; // ✅ AJOUTÉ
+  address?: string;
+  phone?: string;      // ✅ AJOUTÉ
+  email?: string;      // ✅ AJOUTÉ
   type: string;
   region: string;
   city: string;
@@ -25,7 +27,9 @@ const schema = new Schema<IShop>(
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     logo: { type: String },
-    address: { type: String }, // ✅ AJOUTÉ
+    address: { type: String },
+    phone: { type: String },      // ✅ AJOUTÉ
+    email: { type: String },      // ✅ AJOUTÉ
     type: { type: String, required: true },
     region: { type: String, required: true },
     city: { type: String, required: true },
