@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
+  const router = useRouter();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,20 +19,21 @@ export default function AdminLoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
+        credentials: 'include', // Important pour les cookies
       });
 
-      // ✅ Si le serveur a réussi, il nous redirige automatiquement
-      if (res.redirected) {
-        window.location.href = res.url;
-        return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Code incorrect');
       }
 
-      // Sinon, c'est une erreur (ex: code incorrect)
-      const data = await res.json();
-      setError(`❌ ${data.error || 'Code incorrect'}`);
-      setLoading(false);
+      // ✅ Succès : l'API a créé le cookie, on redirige vers l'admin
+      router.push('/admin/dashboard');
+      router.refresh(); // Rafraîchir pour que le middleware reconnaisse le token
+      
     } catch (err: any) {
-      setError(`❌ Erreur réseau: ${err.message}`);
+      setError(`❌ ${err.message}`);
       setLoading(false);
     }
   };

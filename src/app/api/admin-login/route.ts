@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Code incorrect' }, { status: 401 });
     }
 
-    // ✅ CORRECTION : Utiliser un faux ObjectId valide (24 caractères hex) pour éviter le crash Mongoose
+    // Création du token avec un ID valide et le rôle admin
     const token = createToken({
       userId: '650000000000000000000001', 
       email: 'magloireagouda764@gmail.com',
@@ -19,18 +19,22 @@ export async function POST(request: Request) {
       name: 'Admin Magloire'
     });
 
+    // Définition du cookie
     const cookieStore = await cookies();
     cookieStore.set('_vercel_jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 7 jours
       path: '/'
     });
 
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    // ✅ CORRECTION : Retourner un JSON de succès au lieu d'une redirection.
+    // Le frontend se chargera de la redirection après avoir reçu ce JSON.
+    return NextResponse.json({ success: true, message: 'Connexion réussie' });
     
   } catch (error: any) {
+    console.error('Erreur login admin:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
