@@ -3,35 +3,57 @@ import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // ✅ EXCLUSION : Ne jamais intercepter les routes /api
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  // ✅ EXCLUSION : Ne jamais intercepter les pages publiques
+  const publicRoutes = [
+    '/admin-login',
+    '/auth/login',
+    '/auth/register',
+    '/professional-space',
+    '/propose',
+    '/discover',
+    '/marketplace',
+    '/services',
+    '/restaurants',
+    '/hotels',
+    '/',
+  ];
+
+  for (const route of publicRoutes) {
+    if (pathname === route || pathname.startsWith(route + '/')) {
+      return NextResponse.next();
+    }
+  }
+
+  // Maintenant on peut vérifier le token en toute sécurité
   const token = await getTokenFromCookie();
   const payload = token ? await verifyToken(token) : null;
 
   // 1. Protection des routes /dashboard (Espace Propriétaire)
-  // Si l'utilisateur n'est pas connecté, on le redirige vers la connexion
   if (!payload && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/admin-login', request.url));
   }
 
   // 2. Gestion de la racine /dashboard
-  // On dirige chacun vers son espace dédié selon son rôle
   if (pathname === '/dashboard') {
     if (payload?.role === 'admin') {
-      // L'admin va vers son tableau de bord de contrôle global
       return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
-    // Les propriétaires/vendeurs vont vers leur espace personnel
     return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
   }
 
-  // 3. Protection des routes /admin (Réservé strictement aux admins)
+  // 3. Protection des routes /admin (Réservé aux admins)
   if (pathname.startsWith('/admin')) {
     if (!payload || payload.role !== 'admin') {
-      // Si un non-admin essaie d'accéder à l'admin, on le rejette
       return NextResponse.redirect(new URL('/admin-login', request.url));
     }
   }
 
-  // 4. Tout le reste (pages publiques comme /professional-space, /propose, etc.) → laisser passer
   return NextResponse.next();
 }
 
@@ -39,6 +61,7 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
+    '/api/:path*',
     '/auth/login',
     '/auth/register',
   ],
