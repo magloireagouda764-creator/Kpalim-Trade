@@ -137,82 +137,102 @@ export default function HomePage() {
       </section>
 
       {/* ============================================
-          2. LES 3 PÔLES — Explorez Kpalimé-Trade
-      ============================================ */}
-      <section className="py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Explorez {APP_NAME}
-            </h2>
-            <p className="text-muted max-w-2xl mx-auto">
-              Trois grandes portes d'entrée vers l'écosystème économique et culturel
-            </p>
+    2. LES 4 PÔLES — Explorez Kpalimé-Trade
+============================================ */}
+<section className="py-16 md:py-20">
+  <div className="max-w-7xl mx-auto px-4">
+    <div className="text-center mb-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+        Explorez {APP_NAME}
+      </h2>
+      <p className="text-muted max-w-2xl mx-auto">
+        Quatre grandes portes d'entrée vers l'écosystème économique et culturel
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Pôle 1 — Marketplace */}
+      <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-emerald-brand/10 to-night-light p-8 hover:border-emerald-brand/50 transition-all">
+        <div className="relative z-10">
+          <div className="w-14 h-14 rounded-md bg-emerald-brand/20 flex items-center justify-center mb-5">
+            <ShoppingBag size={28} className="text-emerald-brand" />
           </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Pôle 1 — Marketplace */}
-            <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-emerald-brand/10 to-night-light p-8 hover:border-emerald-brand/50 transition-all">
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-md bg-emerald-brand/20 flex items-center justify-center mb-5">
-                  <ShoppingBag size={28} className="text-emerald-brand" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Marketplace</h3>
-                <p className="text-muted text-sm leading-relaxed mb-6">
-                  Découvrez des produits du Togo et d'ailleurs, trouvez des fournisseurs et développez vos opportunités commerciales.
-                </p>
-                <Link
-                  href="/marketplace"
-                  prefetch
-                  className="inline-flex items-center gap-2 text-emerald-brand font-semibold hover:gap-3 transition-all"
-                >
-                  Explorer les produits <ArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Pôle 2 — Découvrir le Togo */}
-            <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-gold/10 to-night-light p-8 hover:border-gold/50 transition-all">
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-md bg-gold/20 flex items-center justify-center mb-5">
-                  <Palmtree size={28} className="text-gold" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Découvrir le Togo</h3>
-                <p className="text-muted text-sm leading-relaxed mb-6">
-                  Explorez les destinations, la culture, le tourisme, les arts, l'artisanat et les expériences du Togo.
-                </p>
-                <Link
-                  href="/discover"
-                  prefetch
-                  className="inline-flex items-center gap-2 text-gold font-semibold hover:gap-3 transition-all"
-                >
-                  Découvrir le Togo <ArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Pôle 3 — Entreprises & Services */}
-            <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-blue-500/10 to-night-light p-8 hover:border-blue-500/50 transition-all">
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-md bg-blue-500/20 flex items-center justify-center mb-5">
-                  <Building2 size={28} className="text-blue-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">Entreprises & Services</h3>
-                <p className="text-muted text-sm leading-relaxed mb-6">
-                  Trouvez des entreprises, des professionnels, des fournisseurs et des services adaptés à vos besoins.
-                </p>
-                <Link
-                  href="/services"
-                  prefetch
-                  className="inline-flex items-center gap-2 text-blue-400 font-semibold hover:gap-3 transition-all"
-                >
-                  Explorer les entreprises & services <ArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
-          </div>
+          <h3 className="text-xl font-bold text-white mb-3">Marketplace</h3>
+          <p className="text-muted text-sm leading-relaxed mb-6">
+            Découvrez des produits du Togo et d'ailleurs, trouvez des fournisseurs et développez vos opportunités commerciales.
+          </p>
+          <Link
+            href="/marketplace"
+            prefetch
+            className="inline-flex items-center gap-2 text-emerald-brand font-semibold hover:gap-3 transition-all"
+          >
+            Explorer les produits <ArrowRight size={16} />
+          </Link>
         </div>
-      </section>
+      </div>
+
+      {/* Pôle 2 — Découvrir le Togo */}
+      <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-gold/10 to-night-light p-8 hover:border-gold/50 transition-all">
+        <div className="relative z-10">
+          <div className="w-14 h-14 rounded-md bg-gold/20 flex items-center justify-center mb-5">
+            <Palmtree size={28} className="text-gold" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-3">Découvrir le Togo</h3>
+          <p className="text-muted text-sm leading-relaxed mb-6">
+            Explorez les destinations, la culture, le tourisme, les arts, l'artisanat et les expériences du Togo.
+          </p>
+          <Link
+            href="/discover"
+            prefetch
+            className="inline-flex items-center gap-2 text-gold font-semibold hover:gap-3 transition-all"
+          >
+            Découvrir le Togo <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Pôle 3 — Entreprises & Services */}
+      <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-blue-500/10 to-night-light p-8 hover:border-blue-500/50 transition-all">
+        <div className="relative z-10">
+          <div className="w-14 h-14 rounded-md bg-blue-500/20 flex items-center justify-center mb-5">
+            <Building2 size={28} className="text-blue-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-3">Entreprises & Services</h3>
+          <p className="text-muted text-sm leading-relaxed mb-6">
+            Trouvez des entreprises, des professionnels, des fournisseurs et des services adaptés à vos besoins.
+          </p>
+          <Link
+            href="/services"
+            prefetch
+            className="inline-flex items-center gap-2 text-blue-400 font-semibold hover:gap-3 transition-all"
+          >
+            Explorer les entreprises & services <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Pôle 4 — Espace Professionnel */}
+      <div className="group relative overflow-hidden rounded-md border border-white/10 bg-gradient-to-br from-purple-500/10 to-night-light p-8 hover:border-purple-500/50 transition-all">
+        <div className="relative z-10">
+          <div className="w-14 h-14 rounded-md bg-purple-500/20 flex items-center justify-center mb-5">
+            <Handshake size={28} className="text-purple-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-3">Espace Professionnel</h3>
+          <p className="text-muted text-sm leading-relaxed mb-6">
+            Gérez vos établissements, suivez vos réservations et communiquez avec vos clients.
+          </p>
+          <Link
+            href="/professional-space"
+            prefetch
+            className="inline-flex items-center gap-2 text-purple-400 font-semibold hover:gap-3 transition-all"
+          >
+            Accéder à mon espace <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* ============================================
           3. QUE RECHERCHEZ-VOUS ? (Accès rapides)
