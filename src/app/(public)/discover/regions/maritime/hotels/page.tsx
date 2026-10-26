@@ -27,7 +27,7 @@ export default async function MaritimeHotelsPage() {
 
   try {
     // Utiliser l'URL absolue de Vercel
-    const baseUrl = 'https://kpalim-trade.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://kpalim-trade-54v8.vercel.app';
     const res = await fetch(`${baseUrl}/api/accommodations?type=hotel&region=Maritime&limit=20`, { 
       cache: 'no-store',
       next: { revalidate: 60 } // Revalider toutes les 60 secondes
@@ -71,7 +71,9 @@ export default async function MaritimeHotelsPage() {
               <h2 className="text-2xl font-bold text-white">Établissements disponibles</h2>
               <p className="text-muted text-sm mt-1">{accommodations.length} hôtel(s) approuvé(s)</p>
             </div>
-            <Link href="/dashboard/accommodations/new" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all touch-target w-fit">
+            
+            {/* ✅ CORRECTION 1 : Lien vers le formulaire public */}
+            <Link href="/propose/accommodation" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all touch-target w-fit">
               <Plus size={18} /> Ajouter mon établissement
             </Link>
           </div>
@@ -84,8 +86,10 @@ export default async function MaritimeHotelsPage() {
                 Les hôtels de la Région Maritime sont en cours de vérification. 
                 Vous êtes propriétaire ? Ajoutez votre établissement dès maintenant.
               </p>
+              
+              {/* ✅ CORRECTION 2 : Lien vers le formulaire public */}
               <Link 
-                href="/dashboard/accommodations/new"
+                href="/propose/accommodation"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
               >
                 <Plus size={18} />
