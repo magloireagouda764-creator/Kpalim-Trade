@@ -1,43 +1,6 @@
-'use client';
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { adminLoginAction } from '@/actions/adminLogin';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const res = await fetch('/api/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-        credentials: 'include', // Important pour les cookies
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Code incorrect');
-      }
-
-      // ✅ Succès : l'API a créé le cookie, on redirige vers l'admin
-      router.push('/admin/dashboard');
-      router.refresh(); // Rafraîchir pour que le middleware reconnaisse le token
-      
-    } catch (err: any) {
-      setError(`❌ ${err.message}`);
-      setLoading(false);
-    }
-  };
-
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -63,17 +26,11 @@ export default function AdminLoginPage() {
           Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
-        {error && (
-          <div style={{ background: '#440000', color: '#ff6666', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.9rem' }}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
+        {/* Formulaire HTML natif - PAS de JavaScript bloquant */}
+        <form action={adminLoginAction}>
           <input
             type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+            name="code"
             required
             maxLength={8}
             style={{ 
@@ -86,14 +43,13 @@ export default function AdminLoginPage() {
 
           <button
             type="submit"
-            disabled={loading || code.length !== 8}
             style={{ 
-              width: '100%', padding: '1rem', background: code.length === 8 ? '#00ff00' : '#333',
-              color: code.length === 8 ? '#000' : '#666', border: 'none', borderRadius: '4px',
-              fontSize: '1.1rem', fontWeight: 'bold', cursor: code.length === 8 ? 'pointer' : 'not-allowed'
+              width: '100%', padding: '1rem', background: '#00ff00',
+              color: '#000', border: 'none', borderRadius: '4px',
+              fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer'
             }}
           >
-            {loading ? 'Connexion...' : 'Accéder au Dashboard'}
+            Accéder au Dashboard
           </button>
         </form>
 
