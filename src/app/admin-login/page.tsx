@@ -1,30 +1,11 @@
 'use client';
 
+import { useActionState } from 'react';
 import { adminLoginAction } from '@/actions/adminLogin';
-import { useState } from 'react';
 
 export default function AdminLoginPage() {
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setIsPending(true);
-
-    const formData = new FormData(e.currentTarget);
-
-    try {
-      await adminLoginAction(formData);
-    } catch (err: any) {
-      if (err.message === 'NEXT_REDIRECT') {
-        return; 
-      }
-      
-      setError(err.message || 'Code incorrect');
-      setIsPending(false);
-    }
-  };
+  // useActionState attend (action, état_initial)
+  const [state, formAction, isPending] = useActionState(adminLoginAction, null);
 
   return (
     <div style={{ 
@@ -51,13 +32,15 @@ export default function AdminLoginPage() {
           Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
-        {error && (
+        {/* Affichage de l'erreur si le code est mauvais */}
+        {state?.error && (
           <div style={{ background: '#440000', color: '#ff6666', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.9rem' }}>
-             {error}
+            ❌ {state.error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {/* Formulaire natif lié à la Server Action */}
+        <form action={formAction}>
           <input
             type="text"
             name="code"

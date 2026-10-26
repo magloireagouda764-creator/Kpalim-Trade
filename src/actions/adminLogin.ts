@@ -4,11 +4,12 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createToken } from '@/lib/auth';
 
-export async function adminLoginAction(formData: FormData) {
+// ⚠️ IMPORTANT : 'prevState' doit être le premier argument pour useActionState
+export async function adminLoginAction(prevState: any, formData: FormData) {
   const code = formData.get('code') as string;
 
   if (code !== '48574857') {
-    throw new Error('Code incorrect');
+    return { error: 'Code incorrect' };
   }
 
   try {
@@ -28,9 +29,9 @@ export async function adminLoginAction(formData: FormData) {
       path: '/',
     });
 
-    // Cette ligne déclenche une redirection côté serveur
+    // Next.js gère cette redirection automatiquement sans planter
     redirect('/admin/dashboard');
   } catch (error: any) {
-    throw new Error(error.message || 'Erreur serveur');
+    return { error: error.message || 'Erreur serveur' };
   }
 }
