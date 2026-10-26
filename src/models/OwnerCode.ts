@@ -1,6 +1,7 @@
-import mongoose, { Schema, Model } from 'mongoose';
+import mongoose, { Schema, Model, Document } from 'mongoose';
 
-export interface IOwnerCode {
+// 1. Interface pour le document (inclut les champs + les méthodes d'instance)
+export interface IOwnerCodeDocument extends Document {
   _id: mongoose.Types.ObjectId;
   code: string;
   ownerId: mongoose.Types.ObjectId;
@@ -13,14 +14,21 @@ export interface IOwnerCode {
   lastActivity: Date;
   createdAt: Date;
   updatedAt: Date;
+
+  // Méthodes d'instance
+  isBlocked(): boolean;
+  isExpired(): boolean;
+  incrementAttempts(): Promise<boolean>;
+  resetAttempts(): Promise<void>;
+  refreshExpiration(): Promise<void>;
 }
 
-// ✅ Interface pour les méthodes statiques
-export interface OwnerCodeModel extends Model<IOwnerCode> {
+// 2. Interface pour les méthodes statiques du modèle
+export interface OwnerCodeModel extends Model<IOwnerCodeDocument> {
   generateCode(): Promise<string>;
 }
 
-const ownerCodeSchema = new Schema<IOwnerCode, OwnerCodeModel>(
+const ownerCodeSchema = new Schema<IOwnerCodeDocument, OwnerCodeModel>(
   {
     code: {
       type: String,
@@ -80,49 +88,44 @@ ownerCodeSchema.index({ ownerId: 1 });
 ownerCodeSchema.index({ accommodationId: 1 });
 ownerCodeSchema.index({ expiresAt: 1 });
 
-// Méthode pour vérifier si le code est bloqué
-ownerCodeSchema.methods.isBlocked = function () {
+// ✅ Méthodes d'instance
+ownerCodeSchema.methods.isBlocked = function (this: IOwnerCodeDocument) {
   if (!this.blockedUntil) return false;
   return new Date() < this.blockedUntil;
 };
 
-// Méthode pour vérifier si le code est expiré
-ownerCodeSchema.methods.isExpired = function () {
+ownerCodeSchema.methods.isExpired = function (this: IOwnerCodeDocument) {
   return new Date() > this.expiresAt;
 };
 
-// Méthode pour incrémenter les tentatives
-ownerCodeSchema.methods.incrementAttempts = async function () {
+ownerCodeSchema.methods.incrementAttempts = async function (this: IOwnerCodeDocument) {
   this.attempts += 1;
   this.lastActivity = new Date();
 
-  // Si 5 tentatives échouées, bloquer pour 5 minutes
   if (this.attempts >= 5) {
     this.blockedUntil = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-    this.attempts = 0; // Reset pour la prochaine session
+    this.attempts = 0;
   }
 
   await this.save();
   return this.isBlocked();
 };
 
-// Méthode pour réinitialiser après succès
-ownerCodeSchema.methods.resetAttempts = async function () {
+ownerCodeSchema.methods.resetAttempts = async function (this: IOwnerCodeDocument) {
   this.attempts = 0;
   this.blockedUntil = null;
   this.lastActivity = new Date();
   await this.save();
 };
 
-// Méthode pour prolonger l'expiration (30 min d'inactivité)
-ownerCodeSchema.methods.refreshExpiration = async function () {
+ownerCodeSchema.methods.refreshExpiration = async function (this: IOwnerCodeDocument) {
   this.expiresAt = new Date(Date.now() + 30 * 60 * 1000);
   this.lastActivity = new Date();
   await this.save();
 };
 
-// ✅ Méthode statique pour générer un code unique
-ownerCodeSchema.statics.generateCode = async function (): Promise<string> {
+// ✅ Méthode statique
+ownerCodeSchema.statics.generateCode = async function (this: OwnerCodeModel): Promise<string> {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
@@ -152,4 +155,4 @@ ownerCodeSchema.statics.generateCode = async function (): Promise<string> {
 // ✅ Export avec le bon typage
 export const OwnerCode: OwnerCodeModel =
   (mongoose.models.OwnerCode as OwnerCodeModel) ||
-  mongoose.model<IOwnerCode, OwnerCodeModel>('OwnerCode', ownerCodeSchema);
+  mongoose.model<IOwnerCodeDocument, OwnerCodeModel>('OwnerCode', ownerCodeSchema);
