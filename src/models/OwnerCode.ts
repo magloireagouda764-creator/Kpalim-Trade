@@ -2,20 +2,25 @@ import mongoose, { Schema, Model } from 'mongoose';
 
 export interface IOwnerCode {
   _id: mongoose.Types.ObjectId;
-  code: string; // ex: KT-4A8B2X
+  code: string;
   ownerId: mongoose.Types.ObjectId;
-  establishmentName: string; // Nom exact de l'établissement
+  establishmentName: string;
   accommodationId: mongoose.Types.ObjectId;
   status: 'pending' | 'approved' | 'rejected';
-  attempts: number; // Nombre de tentatives échouées
-  blockedUntil: Date; // Date de fin de blocage
-  expiresAt: Date; // Date d'expiration du code
-  lastActivity: Date; // Dernière activité
+  attempts: number;
+  blockedUntil: Date | null;
+  expiresAt: Date;
+  lastActivity: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ownerCodeSchema = new Schema<IOwnerCode>(
+// ✅ Interface pour les méthodes statiques
+export interface OwnerCodeModel extends Model<IOwnerCode> {
+  generateCode(): Promise<string>;
+}
+
+const ownerCodeSchema = new Schema<IOwnerCode, OwnerCodeModel>(
   {
     code: {
       type: String,
@@ -116,7 +121,7 @@ ownerCodeSchema.methods.refreshExpiration = async function () {
   await this.save();
 };
 
-// Méthode statique pour générer un code unique
+// ✅ Méthode statique pour générer un code unique
 ownerCodeSchema.statics.generateCode = async function (): Promise<string> {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -125,19 +130,16 @@ ownerCodeSchema.statics.generateCode = async function (): Promise<string> {
   let isUnique = false;
 
   while (!isUnique) {
-    // 2 lettres aléatoires
     const prefix = Array.from({ length: 2 }, () =>
       letters.charAt(Math.floor(Math.random() * letters.length))
     ).join('');
 
-    // 4 caractères alphanumériques
     const suffix = Array.from({ length: 4 }, () =>
       alphanumeric.charAt(Math.floor(Math.random() * alphanumeric.length))
     ).join('');
 
     code = `${prefix}-${suffix}`;
 
-    // Vérifier l'unicité
     const existing = await this.findOne({ code });
     if (!existing) {
       isUnique = true;
@@ -147,6 +149,7 @@ ownerCodeSchema.statics.generateCode = async function (): Promise<string> {
   return code;
 };
 
-export const OwnerCode: Model<IOwnerCode> =
-  mongoose.models.OwnerCode ||
-  mongoose.model<IOwnerCode>('OwnerCode', ownerCodeSchema);
+// ✅ Export avec le bon typage
+export const OwnerCode: OwnerCodeModel =
+  (mongoose.models.OwnerCode as OwnerCodeModel) ||
+  mongoose.model<IOwnerCode, OwnerCodeModel>('OwnerCode', ownerCodeSchema);
