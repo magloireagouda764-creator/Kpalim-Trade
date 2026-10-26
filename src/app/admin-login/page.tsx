@@ -1,6 +1,12 @@
+'use client';
+
+import { useActionState } from 'react';
 import { adminLoginAction } from '@/actions/adminLogin';
 
 export default function AdminLoginPage() {
+  // useActionState gère l'état, l'action et le statut de chargement
+  const [state, formAction, isPending] = useActionState(adminLoginAction, null);
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -26,8 +32,15 @@ export default function AdminLoginPage() {
           Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
-        {/* Formulaire HTML natif - PAS de JavaScript bloquant */}
-        <form action={adminLoginAction}>
+        {/* Affichage de l'erreur si elle existe */}
+        {state?.error && (
+          <div style={{ background: '#440000', color: '#ff6666', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.9rem' }}>
+            ❌ {state.error}
+          </div>
+        )}
+
+        {/* Formulaire HTML natif lié à la Server Action */}
+        <form action={formAction}>
           <input
             type="text"
             name="code"
@@ -43,13 +56,17 @@ export default function AdminLoginPage() {
 
           <button
             type="submit"
+            disabled={isPending}
             style={{ 
-              width: '100%', padding: '1rem', background: '#00ff00',
-              color: '#000', border: 'none', borderRadius: '4px',
-              fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer'
+              width: '100%', padding: '1rem', 
+              background: isPending ? '#333' : '#00ff00',
+              color: isPending ? '#666' : '#000', 
+              border: 'none', borderRadius: '4px',
+              fontSize: '1.1rem', fontWeight: 'bold', 
+              cursor: isPending ? 'not-allowed' : 'pointer'
             }}
           >
-            Accéder au Dashboard
+            {isPending ? 'Connexion...' : 'Accéder au Dashboard'}
           </button>
         </form>
 

@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createToken } from '@/lib/auth';
 
-export async function adminLoginAction(formData: FormData) {
+export async function adminLoginAction(prevState: any, formData: FormData) {
   const code = formData.get('code') as string;
 
   if (code !== '48574857') {
