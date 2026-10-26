@@ -28,10 +28,9 @@ export async function adminLoginAction(formData: FormData) {
       path: '/',
     });
 
-    // Redirection directe après succès
+    // Cette ligne déclenche une redirection côté serveur
     redirect('/admin/dashboard');
   } catch (error: any) {
-    // Si c'est une erreur de création de token, on la relance
     throw new Error(error.message || 'Erreur serveur');
   }
 }
