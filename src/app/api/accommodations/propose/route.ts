@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   try {
     await connectDB();
 
-    // Vérifier l'authentification
+    // 1. Vérifier l'authentification
     const token = await getTokenFromCookie();
     const payload = token ? await verifyToken(token) : null;
 
@@ -22,18 +22,8 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // Validation des champs obligatoires
-    const requiredFields = [
-      'name',
-      'type',
-      'region',
-      'city',
-      'address',
-      'phone',
-      'email',
-      'ownerName',
-    ];
-
+    // 2. Validation des champs obligatoires de base
+    const requiredFields = ['name', 'type', 'region', 'city', 'address', 'phone', 'email', 'ownerName'];
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -43,14 +33,26 @@ export async function POST(req: Request) {
       }
     }
 
-    // Générer un code unique
+    // 3. Générer un slug unique (ex: hotel-le-palmier-1698765432)
+    const baseSlug = body.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    const uniqueSlug = `${baseSlug}-${Date.now()}`;
+
+    // 4. Générer un code d'accès unique
     const code = await OwnerCode.generateCode();
 
-    // Créer l'établissement
+    // 5. Valeurs par défaut pour capacity et roomsCount si non fournies (ex: pour un restaurant)
+    const capacity = body.capacity ? Number(body.capacity) : 1;
+    const roomsCount = body.roomsCount ? Number(body.roomsCount) : 1;
+
+    // 6. Créer l'établissement dans MongoDB
     const accommodation = await Accommodation.create({
       name: body.name,
+      slug: uniqueSlug,
       type: body.type,
-      description: body.description || '',
+      description: body.description || body.shortDescription || 'Aucune description fournie.',
       region: body.region,
       city: body.city,
       address: body.address,
@@ -58,11 +60,15 @@ export async function POST(req: Request) {
       email: body.email,
       ownerId: new mongoose.Types.ObjectId(payload.userId),
       ownerName: body.ownerName,
+      capacity: capacity,
+      roomsCount: roomsCount,
+      priceRange: body.priceRange || 'Non spécifié',
+      amenities: body.amenities || [],
       status: 'pending',
       isActive: false,
     });
 
-    // Créer le code d'accès
+    // 7. Créer le code d'accès lié à cet établissement
     const ownerCode = await OwnerCode.create({
       code,
       ownerId: new mongoose.Types.ObjectId(payload.userId),
@@ -83,7 +89,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Erreur API propose:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Erreur serveur' },
+      { success: false, error: error.message || 'Erreur serveur lors de la soumission.' },
       { status: 500 }
     );
   }
