@@ -28,8 +28,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Vérifier si bloqué
-    if (ownerCode.isBlocked()) {
+    // ✅ Vérifier si bloqué (avec vérification null pour TypeScript)
+    if (ownerCode.isBlocked() && ownerCode.blockedUntil) {
       const minutesLeft = Math.ceil(
         (ownerCode.blockedUntil.getTime() - Date.now()) / 60000
       );
