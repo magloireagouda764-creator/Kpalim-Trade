@@ -47,13 +47,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
   }
 
-  // 3. Protection des routes /admin (Réservé aux admins)
-  if (pathname.startsWith('/admin')) {
-    if (!payload || payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/admin-login', request.url));
-    }
+  // 3. Protection des routes /admin (DÉSACTIVÉ TEMPORAIREMENT)
+if (pathname.startsWith('/admin')) {
+  // Ne pas bloquer /admin-login
+  if (pathname === '/admin-login') {
+    return NextResponse.next();
   }
-
+  
+  // Laisser passer TOUTES les routes admin pour l'instant
   return NextResponse.next();
 }
 
