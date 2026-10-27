@@ -4,12 +4,13 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createToken } from '@/lib/auth';
 
-// ⚠️ IMPORTANT : 'prevState' doit être le premier argument pour useActionState
+// Le premier argument 'prevState' est requis par la façon dont on l'appelle
 export async function adminLoginAction(prevState: any, formData: FormData) {
   const code = formData.get('code') as string;
 
+  // ⚠️ IMPORTANT : On lance une erreur pour que le catch du frontend puisse l'attraper
   if (code !== '48574857') {
-    return { error: 'Code incorrect' };
+    throw new Error('Code incorrect');
   }
 
   try {
@@ -29,9 +30,10 @@ export async function adminLoginAction(prevState: any, formData: FormData) {
       path: '/',
     });
 
-    // Next.js gère cette redirection automatiquement sans planter
+    // Cette ligne déclenche la redirection. Next.js lève une erreur interne "NEXT_REDIRECT"
+    // qui sera attrapée par ton try/catch dans le frontend pour ne pas bloquer l'interface.
     redirect('/admin/dashboard');
   } catch (error: any) {
-    return { error: error.message || 'Erreur serveur' };
+    throw new Error(error.message || 'Erreur serveur');
   }
 }

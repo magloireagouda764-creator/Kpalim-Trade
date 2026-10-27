@@ -1,11 +1,35 @@
 'use client';
 
-import { useActionState } from 'react';
 import { adminLoginAction } from '@/actions/adminLogin';
+import { useState } from 'react';
 
 export default function AdminLoginPage() {
-  // useActionState attend (action, état_initial)
-  const [state, formAction, isPending] = useActionState(adminLoginAction, null);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setIsPending(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      await adminLoginAction(null, formData);
+      // Si on arrive ici sans erreur NEXT_REDIRECT, c'est un problème
+      setError('Erreur inattendue');
+      setIsPending(false);
+    } catch (err: any) {
+      // Next.js lance NEXT_REDIRECT pour la redirection - c'est NORMAL
+      if (err.message === 'NEXT_REDIRECT') {
+        return; // La redirection se fait automatiquement
+      }
+      
+      // Autres erreurs (code incorrect, etc.)
+      setError(err.message || 'Code incorrect');
+      setIsPending(false);
+    }
+  };
 
   return (
     <div style={{ 
@@ -32,15 +56,13 @@ export default function AdminLoginPage() {
           Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
-        {/* Affichage de l'erreur si le code est mauvais */}
-        {state?.error && (
+        {error && (
           <div style={{ background: '#440000', color: '#ff6666', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.9rem' }}>
-            ❌ {state.error}
+             {error}
           </div>
         )}
 
-        {/* Formulaire natif lié à la Server Action */}
-        <form action={formAction}>
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             name="code"
