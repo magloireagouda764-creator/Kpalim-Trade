@@ -1,12 +1,10 @@
 import { adminLoginAction } from '@/actions/adminLogin';
 
-// ⚠️ IMPORTANT : searchParams est maintenant une Promise dans Next.js 15
 export default async function AdminLoginPage({ 
   searchParams 
 }: { 
   searchParams: Promise<{ error?: string }> 
 }) {
-  // On attend la résolution de la Promise
   const params = await searchParams;
   
   const errorMessage = params.error === 'incorrect' 
