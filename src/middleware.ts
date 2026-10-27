@@ -48,13 +48,16 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Protection des routes /admin (DÉSACTIVÉ TEMPORAIREMENT)
-if (pathname.startsWith('/admin')) {
-  // Ne pas bloquer /admin-login
-  if (pathname === '/admin-login') {
+  if (pathname.startsWith('/admin')) {
+    // Ne pas bloquer /admin-login
+    if (pathname === '/admin-login') {
+      return NextResponse.next();
+    }
+    
+    // Laisser passer TOUTES les routes admin pour l'instant
     return NextResponse.next();
   }
-  
-  // Laisser passer TOUTES les routes admin pour l'instant
+
   return NextResponse.next();
 }
 
