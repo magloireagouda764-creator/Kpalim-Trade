@@ -1,35 +1,11 @@
-'use client';
-
 import { adminLoginAction } from '@/actions/adminLogin';
-import { useState } from 'react';
 
-export default function AdminLoginPage() {
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setIsPending(true);
-
-    const formData = new FormData(e.currentTarget);
-
-    try {
-      await adminLoginAction(null, formData);
-      // Si on arrive ici sans erreur NEXT_REDIRECT, c'est un problème
-      setError('Erreur inattendue');
-      setIsPending(false);
-    } catch (err: any) {
-      // Next.js lance NEXT_REDIRECT pour la redirection - c'est NORMAL
-      if (err.message === 'NEXT_REDIRECT') {
-        return; // La redirection se fait automatiquement
-      }
-      
-      // Autres erreurs (code incorrect, etc.)
-      setError(err.message || 'Code incorrect');
-      setIsPending(false);
-    }
-  };
+export default function AdminLoginPage({ searchParams }: { searchParams: { error?: string } }) {
+  const errorMessage = searchParams.error === 'incorrect' 
+    ? 'Code incorrect' 
+    : searchParams.error === 'server'
+    ? 'Erreur serveur'
+    : null;
 
   return (
     <div style={{ 
@@ -56,13 +32,13 @@ export default function AdminLoginPage() {
           Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
-        {error && (
+        {errorMessage && (
           <div style={{ background: '#440000', color: '#ff6666', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.9rem' }}>
-             {error}
+             ❌ {errorMessage}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form action={adminLoginAction}>
           <input
             type="text"
             name="code"
@@ -78,17 +54,13 @@ export default function AdminLoginPage() {
 
           <button
             type="submit"
-            disabled={isPending}
             style={{ 
-              width: '100%', padding: '1rem', 
-              background: isPending ? '#333' : '#00ff00',
-              color: isPending ? '#666' : '#000', 
-              border: 'none', borderRadius: '4px',
-              fontSize: '1.1rem', fontWeight: 'bold', 
-              cursor: isPending ? 'not-allowed' : 'pointer'
+              width: '100%', padding: '1rem', background: '#00ff00',
+              color: '#000', border: 'none', borderRadius: '4px',
+              fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer'
             }}
           >
-            {isPending ? 'Connexion...' : 'Accéder au Dashboard'}
+            Accéder au Dashboard
           </button>
         </form>
 
