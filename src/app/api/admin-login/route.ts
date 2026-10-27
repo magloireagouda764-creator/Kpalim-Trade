@@ -1,22 +1,38 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  console.log('🚀 [TEST] L\'API a été appelée !');
-  
   try {
-    const body = await request.json();
-    console.log('🚀 [TEST] Données reçues:', body);
+    const { code } = await request.json();
 
-    if (body?.code !== '48574857') {
+    if (code !== '48574857') {
       return NextResponse.json({ error: 'Code incorrect' }, { status: 401 });
     }
 
-    console.log('🚀 [TEST] Code valide, réponse envoyée.');
-    // On ne crée PAS de token ni de cookie pour ce test
-    return NextResponse.json({ success: true, message: 'Test réussi, pas de blocage' });
-    
+    // Création d'un token simple en base64
+    const payload = {
+      userId: '650000000000000000000001',
+      email: 'magloireagouda764@gmail.com',
+      role: 'admin',
+      name: 'Admin Magloire',
+      exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    };
+
+    const token = Buffer.from(JSON.stringify(payload)).toString('base64');
+
+    // Création de la réponse avec le cookie
+    const response = NextResponse.json({ success: true });
+
+    response.cookies.set('_vercel_jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+
+    return response;
   } catch (error: any) {
-    console.error('🚨 [TEST] Erreur critique:', error);
-    return NextResponse.json({ error: error.message || 'Erreur inconnue' }, { status: 500 });
+    console.error('Erreur login admin:', error);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

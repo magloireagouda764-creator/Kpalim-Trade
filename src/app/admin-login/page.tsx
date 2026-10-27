@@ -1,17 +1,41 @@
-import { adminLoginAction } from '@/actions/adminLogin';
+'use client';
 
-export default async function AdminLoginPage({ 
-  searchParams 
-}: { 
-  searchParams: Promise<{ error?: string }> 
-}) {
-  const params = await searchParams;
-  
-  const errorMessage = params.error === 'incorrect' 
-    ? 'Code incorrect' 
-    : params.error === 'server'
-    ? 'Erreur serveur'
-    : null;
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function AdminLoginPage() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setIsPending(true);
+
+    const formData = new FormData(e.currentTarget);
+    const code = formData.get('code') as string;
+
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Code incorrect');
+      }
+
+      // Succès : le cookie est défini, on redirige
+      window.location.href = '/admin/dashboard';
+    } catch (err: any) {
+      setError(err.message || 'Code incorrect');
+      setIsPending(false);
+    }
+  };
 
   return (
     <div style={{ 
@@ -38,13 +62,13 @@ export default async function AdminLoginPage({
           Code actuel : <strong style={{ color: '#00ff00' }}>48574857</strong>
         </p>
 
-        {errorMessage && (
+        {error && (
           <div style={{ background: '#440000', color: '#ff6666', padding: '0.75rem', borderRadius: '4px', marginBottom: '1rem', fontSize: '0.9rem' }}>
-             ❌ {errorMessage}
+            ❌ {error}
           </div>
         )}
 
-        <form action={adminLoginAction}>
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             name="code"
@@ -60,13 +84,17 @@ export default async function AdminLoginPage({
 
           <button
             type="submit"
+            disabled={isPending}
             style={{ 
-              width: '100%', padding: '1rem', background: '#00ff00',
-              color: '#000', border: 'none', borderRadius: '4px',
-              fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer'
+              width: '100%', padding: '1rem', 
+              background: isPending ? '#333' : '#00ff00',
+              color: isPending ? '#666' : '#000', 
+              border: 'none', borderRadius: '4px',
+              fontSize: '1.1rem', fontWeight: 'bold', 
+              cursor: isPending ? 'not-allowed' : 'pointer'
             }}
           >
-            Accéder au Dashboard
+            {isPending ? 'Connexion...' : 'Accéder au Dashboard'}
           </button>
         </form>
 
