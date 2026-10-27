@@ -2,9 +2,8 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createToken } from '@/lib/auth';
+import { SignJWT } from 'jose';
 
-// ⚠️ IMPORTANT : Pour un <form action={...}>, la fonction ne prend QUE formData
 export async function adminLoginAction(formData: FormData) {
   const code = formData.get('code') as string;
 
@@ -13,12 +12,23 @@ export async function adminLoginAction(formData: FormData) {
   }
 
   try {
-    const token = createToken({
+    // Création manuelle du token JWT sans passer par createToken
+    const secret = new TextEncoder().encode(
+      process.env.JWT_SECRET || 'fallback-secret-for-dev-only-change-in-production'
+    );
+    
+    const token = await new SignJWT({
       userId: '650000000000000000000001',
       email: 'magloireagouda764@gmail.com',
       role: 'admin',
       name: 'Admin Magloire',
-    });
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(secret);
+
+    console.log('✅ Token JWT créé avec succès');
 
     const cookieStore = await cookies();
     cookieStore.set('_vercel_jwt', token, {
@@ -29,8 +39,10 @@ export async function adminLoginAction(formData: FormData) {
       path: '/',
     });
 
+    console.log('✅ Cookie défini, redirection vers /admin/dashboard');
     redirect('/admin/dashboard');
   } catch (error: any) {
+    console.error(' ERREUR CRITIQUE dans adminLoginAction:', error);
     redirect('/admin-login?error=server');
   }
 }
