@@ -1,60 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ✅ EXCLUSION : Ne jamais intercepter les routes /api
-  if (pathname.startsWith('/api')) {
-    return NextResponse.next();
-  }
-
-  // ✅ EXCLUSION : Ne jamais intercepter les pages publiques
-  const publicRoutes = [
-    '/admin-login',
-    '/auth/login',
-    '/auth/register',
-    '/professional-space',
-    '/propose',
-    '/discover',
-    '/marketplace',
-    '/services',
-    '/restaurants',
-    '/hotels',
-    '/',
-  ];
-
-  for (const route of publicRoutes) {
-    if (pathname === route || pathname.startsWith(route + '/')) {
-      return NextResponse.next();
-    }
-  }
-
-  // Maintenant on peut vérifier le token en toute sécurité
-  const token = await getTokenFromCookie();
-  const payload = token ? await verifyToken(token) : null;
-
-  // 1. Protection des routes /dashboard (Espace Propriétaire)
-  if (!payload && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/admin-login', request.url));
-  }
-
-  // 2. Gestion de la racine /dashboard
-  if (pathname === '/dashboard') {
-    if (payload?.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-    return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
-  }
-
-  // 3. Protection des routes /admin (DÉSACTIVÉ TEMPORAIREMENT)
+  // 🚨 TEMPORAIRE : DÉSACTIVATION TOTALE DE LA PROTECTION ADMIN
+  // On laisse TOUT passer pour voir si la page s'affiche enfin
   if (pathname.startsWith('/admin')) {
-    // Ne pas bloquer /admin-login
-    if (pathname === '/admin-login') {
-      return NextResponse.next();
-    }
-    
-    // Laisser passer TOUTES les routes admin pour l'instant
     return NextResponse.next();
   }
 
@@ -62,11 +13,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/admin/:path*',
-    '/api/:path*',
-    '/auth/login',
-    '/auth/register',
-  ],
+  matcher: ['/admin/:path*'],
 };
