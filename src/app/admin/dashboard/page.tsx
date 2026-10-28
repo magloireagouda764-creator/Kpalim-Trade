@@ -2,9 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/auth';
 
-// ✅ Ajout de 'async' ici
 export default async function AdminDashboardPage() {
-  // ✅ Ajout de 'await' ici pour Next.js 15
   const cookieStore = await cookies();
   const token = cookieStore.get('_vercel_jwt')?.value;
   
@@ -12,7 +10,8 @@ export default async function AdminDashboardPage() {
     redirect('/admin-login');
   }
 
-  const payload = verifyToken(token);
+  // ⚠️ IMPORTANT : Ajouter 'await' ici car verifyToken est maintenant async
+  const payload = await verifyToken(token);
   
   if (!payload || payload.role !== 'admin') {
     redirect('/admin-login');
