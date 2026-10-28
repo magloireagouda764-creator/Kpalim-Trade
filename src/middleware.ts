@@ -1,39 +1,30 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { getTokenFromCookie, verifyToken } from '@/lib/auth';
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = await getTokenFromCookie();
-  const payload = token ? verifyToken(token) : null;
 
-  // 1. Routes publiques (laisser passer tout le monde)
-  if (pathname === '/' || pathname.startsWith('/api')) {
+  // 1. Lire le cookie directement depuis la requête (100% compatible Edge Runtime)
+  const token = request.cookies.get('kpalime_token')?.value;
+  const isAuthenticated = !!token;
+
+  // 2. Si déjà connecté et qu'il essaie d'aller sur la page de login → rediriger vers le dashboard
+  if (isAuthenticated && pathname === '/admin-login') {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+  }
+
+  // 3. Routes publiques (laisser passer tout le monde)
+  if (pathname === '/' || pathname.startsWith('/api') || pathname.startsWith('/propose')) {
     return NextResponse.next();
   }
 
-  // 2. Si PAS connecté et route protégée → rediriger vers admin-login
-  if (!payload && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
+  // 4. Si PAS connecté et route protégée → rediriger vers admin-login
+  if (!isAuthenticated && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
     return NextResponse.redirect(new URL('/admin-login', request.url));
   }
 
-  // 3. Si connecté et admin → laisser accéder à /admin/*
-  if (pathname.startsWith('/admin') && payload?.role === 'admin') {
-    return NextResponse.next();
-  }
-
-  // 4. Si connecté mais PAS admin → bloquer l'accès admin
-  if (pathname.startsWith('/admin') && payload?.role !== 'admin') {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  // 5. /dashboard sans sous-page → rediriger selon rôle
-  if (pathname === '/dashboard') {
-    if (payload?.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-    return NextResponse.redirect(new URL('/dashboard/accommodations', request.url));
-  }
-
+  // 5. Si connecté, on laisse passer. 
+  // La vérification du rôle (admin) est gérée dans les Server Components (page.tsx)
+  // où jsonwebtoken fonctionne sans problème.
   return NextResponse.next();
 }
 
@@ -41,7 +32,6 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
-    '/auth/login',
-    '/auth/register',
+    '/admin-login',
   ],
 };
