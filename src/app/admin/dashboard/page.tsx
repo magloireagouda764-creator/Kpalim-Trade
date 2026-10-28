@@ -1,12 +1,11 @@
 import { Suspense } from 'react';
 import { connectDB } from '@/lib/mongodb';
-import User from '@/models/User';
-import Shop from '@/models/Shop';
-import Product from '@/models/Product';
-import Accommodation from '@/models/Accommodation';
-import Restaurant from '@/models/Restaurant';
+import { User } from '@/models/User';
+import { Shop } from '@/models/Shop';
+import { Product } from '@/models/Product';
+import { Accommodation } from '@/models/Accommodation';
+import { Restaurant } from '@/models/Restaurant';
 import { Users, Store, Package, Hotel, UtensilsCrossed, Clock, Bell, CheckCircle, AlertTriangle } from 'lucide-react';
-
 async function DashboardStats() {
   await connectDB();
 
