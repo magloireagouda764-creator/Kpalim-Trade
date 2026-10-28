@@ -1,48 +1,37 @@
 import { cookies } from 'next/headers';
-import { SignJWT, jwtVerify } from 'jose';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || 'kpalime_trade_secret_key_2024_super_secure'
-);
+const JWT_SECRET = process.env.AUTH_SECRET || 'kpalime_trade_secret_key_2024';
 
-// 1. Créer un token JWT (Compatible Edge et Node)
-export async function createToken(payload: any): Promise<string> {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(JWT_SECRET);
+// 1. Créer un token JWT
+export function createToken(payload: any): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }
 
-// 2. Vérifier un token JWT (Compatible Edge et Node, donc parfait pour le middleware !)
-export async function verifyToken(token: string): Promise<any> {
+// 2. Vérifier un token JWT
+export function verifyToken(token: string): any {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload;
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
-    console.error('Échec de la vérification du token:', error);
     return null;
   }
 }
 
-// 3. Récupérer le token depuis les cookies
+// 3. Récupérer le token depuis les cookies (côté serveur)
 export async function getTokenFromCookie(): Promise<string | undefined> {
   const cookieStore = await cookies();
-  return (
-    cookieStore.get('_vercel_jwt')?.value ||
-    cookieStore.get('kpalime_token')?.value ||
-    cookieStore.get('token')?.value
-  );
+  return cookieStore.get('kpalime_token')?.value;
 }
 
-// 4. Récupérer l'utilisateur actuel
+// 4. Récupérer l'utilisateur actuel (côté serveur)
 export async function getCurrentUser() {
   try {
     const token = await getTokenFromCookie();
     if (!token) return null;
     
-    return await verifyToken(token);
+    const decoded = verifyToken(token);
+    return decoded;
   } catch (error) {
     return null;
   }
