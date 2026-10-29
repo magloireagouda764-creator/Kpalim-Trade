@@ -1,32 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Building2, Hotel, UtensilsCrossed, Lock, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
+import { Lock, ArrowRight, Sparkles, AlertCircle, Building2 } from 'lucide-react';
 
 export default function ProfessionalSpacePage() {
   const [inputCode, setInputCode] = useState('');
-  const [establishments, setEstablishments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [inputName, setInputName] = useState('');
+  const [step, setStep] = useState<'code' | 'name'>('code');
   const [error, setError] = useState('');
-
-  // Charger les établissements approuvés depuis la base de données
-  useEffect(() => {
-    async function fetchEstablishments() {
-      try {
-        const res = await fetch('/api/professional-space/list');
-        const data = await res.json();
-        if (data.success) {
-          setEstablishments(data.data);
-        }
-      } catch (err) {
-        console.error('Erreur chargement:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchEstablishments();
-  }, []);
+  const [loading, setLoading] = useState(false);
 
   const handleCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,32 +22,57 @@ export default function ProfessionalSpacePage() {
       return;
     }
     
-    // Rediriger vers le dashboard avec le code en paramètre
-    window.location.href = `/professional-space/dashboard?code=${cleanCode}`;
+    // Passer à l'étape suivante
+    setStep('name');
+    setError('');
   };
 
-  const getIcon = (type: string) => {
-    if (type === 'hotel') return Hotel;
-    if (type === 'restaurant') return UtensilsCrossed;
-    return Building2;
-  };
+  const handleNameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!inputName.trim()) {
+      setError('Veuillez entrer le nom de votre établissement.');
+      return;
+    }
 
-  const getColor = (index: number) => {
-    const colors = [
-      'from-blue-500/20 to-blue-500/5 border-blue-500/30 hover:border-blue-400',
-      'from-emerald-500/20 to-emerald-500/5 border-emerald-500/30 hover:border-emerald-400',
-      'from-purple-500/20 to-purple-500/5 border-purple-500/30 hover:border-purple-400',
-      'from-orange-500/20 to-orange-500/5 border-orange-500/30 hover:border-orange-400',
-      'from-pink-500/20 to-pink-500/5 border-pink-500/30 hover:border-pink-400',
-    ];
-    return colors[index % colors.length];
+    setLoading(true);
+    setError('');
+
+    try {
+      // Nettoyer le code
+      const cleanCode = inputCode.replace(/-/g, '').toUpperCase();
+      
+      // Vérifier le code ET le nom
+      const res = await fetch('/api/professional-space/verify-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: cleanCode,
+          name: inputName.trim()
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        // Rediriger vers le dashboard
+        window.location.href = `/professional-space/dashboard?code=${cleanCode}`;
+      } else {
+        setError(data.error || 'Code ou nom incorrect.');
+      }
+    } catch (err) {
+      console.error('Erreur vérification:', err);
+      setError('Erreur de connexion. Réessayez.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-night text-white p-6 md:p-10">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         
-        {/* En-tête et Barre de code */}
+        {/* En-tête */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
             <Sparkles className="text-purple-400" /> Espace Professionnel
@@ -72,100 +80,155 @@ export default function ProfessionalSpacePage() {
           <p className="text-muted mb-8 max-w-2xl mx-auto">
             Accédez à votre tableau de bord pour gérer vos clients, vos réservations et vos communications.
           </p>
+        </div>
 
-          {/* Barre de saisie du code */}
-          <form onSubmit={handleCodeSubmit} className="max-w-md mx-auto bg-night-light p-6 rounded-xl border border-white/10 shadow-2xl">
-            <label className="block text-sm font-semibold text-gray-300 mb-3 text-center">
-              Saisissez votre code d'accès unique (6 caractères)
-            </label>
-            <div className="flex gap-3">
-              <input
-                type="text"
-                maxLength={7} // 6 caractères + 1 tiret
-                value={inputCode}
-                onChange={(e) => {
-                  // Garder uniquement lettres et chiffres, en majuscule
-                  let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); 
-                  
-                  // Ajouter automatiquement le tiret après 2 caractères
-                  if (val.length > 2 && val.length <= 6 && !val.includes('-')) {
-                    val = val.slice(0, 2) + '-' + val.slice(2);
-                  }
-                  
-                  // Limiter à 7 caractères max (XX-XXXX)
-                  if (val.length > 7) {
-                    val = val.slice(0, 7);
-                  }
-                  
-                  setInputCode(val);
-                  setError('');
-                }}
-                placeholder="XX-XXXX"
-                className="flex-1 px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 text-center text-2xl font-bold tracking-widest text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 uppercase"
-              />
+        {/* Formulaire en 2 étapes */}
+        <div className="bg-night-light p-8 rounded-2xl border border-white/10 shadow-2xl">
+          
+          {step === 'code' ? (
+            // ÉTAPE 1 : Saisie du code
+            <form onSubmit={handleCodeSubmit}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-purple-500/20">
+                  <Lock className="text-purple-400" size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Étape 1/2</h2>
+                  <p className="text-sm text-muted">Entrez votre code d'accès</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Votre code d'identification à 6 caractères
+                </label>
+                <input
+                  type="text"
+                  maxLength={7}
+                  value={inputCode}
+                  onChange={(e) => {
+                    let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (val.length > 2 && val.length <= 6 && !val.includes('-')) {
+                      val = val.slice(0, 2) + '-' + val.slice(2);
+                    }
+                    if (val.length > 7) val = val.slice(0, 7);
+                    setInputCode(val);
+                    setError('');
+                  }}
+                  placeholder="XX-XXXX"
+                  className="w-full px-4 py-4 rounded-lg bg-gray-900 border border-gray-700 text-center text-2xl font-bold tracking-widest text-white focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 uppercase"
+                  autoFocus
+                />
+                <p className="text-xs text-muted mt-2">
+                  Exemple : JH-PPQ8 (le code que vous avez reçu)
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
+                  <AlertCircle size={18} className="text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300">{error}</p>
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                className="w-full py-4 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
               >
-                <Lock size={18} /> Entrer
+                Continuer <ArrowRight size={18} />
               </button>
-            </div>
-            {error && (
-              <p className="text-red-400 text-sm mt-3 text-center flex items-center justify-center gap-2">
-                <AlertCircle size={14} /> {error}
-              </p>
-            )}
-          </form>
-        </div>
-
-        {/* Séparateur */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="h-px bg-white/10 flex-1" />
-          <span className="text-muted text-sm uppercase tracking-wider font-semibold">Établissements validés sur la plateforme</span>
-          <div className="h-px bg-white/10 flex-1" />
-        </div>
-
-        {/* Grille des rectangles (Établissements dynamiques) */}
-        {loading ? (
-          <div className="text-center py-12 text-muted">Chargement des établissements...</div>
-        ) : establishments.length === 0 ? (
-          <div className="text-center py-12 text-muted bg-night-light rounded-xl border border-white/5 p-8">
-            <Building2 size={48} className="mx-auto mb-4 opacity-50" />
-            <p>Aucun établissement n'est encore validé pour le moment.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {establishments.map((item, index) => {
-              const Icon = getIcon(item.type);
-              return (
-                <div
-                  key={item._id}
-                  onClick={() => {
-                    setInputCode('');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    setTimeout(() => {
-                      alert(`Pour accéder à l'espace de "${item.name}", veuillez saisir votre code personnel à 6 caractères dans la barre en haut de cette page.`);
-                    }, 300);
-                  }}
-                  className={`group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${getColor(index)}`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
-                      <Icon size={28} className="text-white" />
-                    </div>
-                    <span className="px-2 py-1 rounded text-xs font-medium bg-white/10 text-white/80 capitalize">
-                      {item.type === 'hotel' ? 'Hôtel' : item.type === 'restaurant' ? 'Restaurant' : item.type}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
-                    {item.name}
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-4">{item.city}, {item.region}</p>
-                  <div className="flex items-center gap-2 text-xs text-purple-300 font-medium">
-                    <Lock size={14} /> Accès réservé au propriétaire
-                  </div>
+            </form>
+          ) : (
+            // ÉTAPE 2 : Saisie du nom de l'établissement
+            <form onSubmit={handleNameSubmit}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-emerald-500/20">
+                  <Building2 className="text-emerald-400" size={24} />
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <div>
+                  <h2 className="text-xl font-bold text-white">Étape 2/2</h2>
+                  <p className="text-sm text-muted">Confirmez le nom de votre établissement</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Nom exact de votre établissement
+                </label>
+                <input
+                  type="text"
+                  value={inputName}
+                  onChange={(e) => {
+                    setInputName(e.target.value);
+                    setError('');
+                  }}
+                  placeholder="Ex: Hôtel Le Palmier"
+                  className="w-full px-4 py-4 rounded-lg bg-gray-900 border border-gray-700 text-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  autoFocus
+                />
+                <p className="text-xs text-muted mt-2">
+                  Entrez le nom exact tel qu'il apparaît sur votre fiche
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
+                  <AlertCircle size={18} className="text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-300">{error}</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('code');
+                    setInputName('');
+                    setError('');
+                  }}
+                  className="flex-1 py-4 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-colors"
+                >
+                  Retour
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-600 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Vérification...
+                    </>
+                  ) : (
+                    <>
+                      Accéder à mon espace <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* Appel à l'action pour les nouveaux */}
+        <div className="mt-12 text-center p-8 rounded-2xl bg-gradient-to-r from-purple-900/30 to-night-light border border-purple-500/20">
+          <h3 className="text-xl font-bold text-white mb-3">
+            Vous n'avez pas encore d'établissement sur la plateforme ?
+          </h3>
+          <p className="text-muted mb-6 max-w-xl mx-auto">
+            Proposez votre hôtel, auberge ou restaurant. Après validation par notre équipe, 
+            vous recevrez votre code d'accès personnel unique.
+          </p>
+          <Link
+            href="/professional-space/propose"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-purple-600/20"
+          >
+            Proposer mon établissement <ArrowRight size={20} />
+          </Link>
+        </div>
+
+      </div>
+    </div>
+  );
+}
