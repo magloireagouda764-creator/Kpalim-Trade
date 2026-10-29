@@ -30,12 +30,17 @@ export default function ProfessionalSpacePage() {
 
   const handleCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputCode.length !== 4) {
-      setError('Le code doit contenir exactement 4 chiffres.');
+    
+    // Nettoyer le code (enlever le tiret) et mettre en majuscule
+    const cleanCode = inputCode.replace(/-/g, '').toUpperCase();
+    
+    if (cleanCode.length !== 6) {
+      setError('Le code doit contenir exactement 6 caractères.');
       return;
     }
+    
     // Rediriger vers le dashboard avec le code en paramètre
-    window.location.href = `/professional-space/dashboard?code=${inputCode}`;
+    window.location.href = `/professional-space/dashboard?code=${cleanCode}`;
   };
 
   const getIcon = (type: string) => {
@@ -71,20 +76,32 @@ export default function ProfessionalSpacePage() {
           {/* Barre de saisie du code */}
           <form onSubmit={handleCodeSubmit} className="max-w-md mx-auto bg-night-light p-6 rounded-xl border border-white/10 shadow-2xl">
             <label className="block text-sm font-semibold text-gray-300 mb-3 text-center">
-              Saisissez votre code d'accès à 4 chiffres
+              Saisissez votre code d'accès unique (6 caractères)
             </label>
             <div className="flex gap-3">
               <input
                 type="text"
-                maxLength={4}
+                maxLength={7} // 6 caractères + 1 tiret
                 value={inputCode}
                 onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, ''); // Force uniquement des chiffres
+                  // Garder uniquement lettres et chiffres, en majuscule
+                  let val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); 
+                  
+                  // Ajouter automatiquement le tiret après 2 caractères
+                  if (val.length > 2 && val.length <= 6 && !val.includes('-')) {
+                    val = val.slice(0, 2) + '-' + val.slice(2);
+                  }
+                  
+                  // Limiter à 7 caractères max (XX-XXXX)
+                  if (val.length > 7) {
+                    val = val.slice(0, 7);
+                  }
+                  
                   setInputCode(val);
                   setError('');
                 }}
-                placeholder="0000"
-                className="flex-1 px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 text-center text-2xl font-bold tracking-widest text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                placeholder="XX-XXXX"
+                className="flex-1 px-4 py-3 rounded-lg bg-gray-900 border border-gray-700 text-center text-2xl font-bold tracking-widest text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 uppercase"
               />
               <button
                 type="submit"
@@ -127,7 +144,7 @@ export default function ProfessionalSpacePage() {
                     setInputCode('');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     setTimeout(() => {
-                      alert(`Pour accéder à l'espace de "${item.name}", veuillez saisir votre code personnel à 4 chiffres dans la barre en haut de cette page.`);
+                      alert(`Pour accéder à l'espace de "${item.name}", veuillez saisir votre code personnel à 6 caractères dans la barre en haut de cette page.`);
                     }, 300);
                   }}
                   className={`group relative overflow-hidden rounded-xl border bg-gradient-to-br p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${getColor(index)}`}
@@ -157,7 +174,7 @@ export default function ProfessionalSpacePage() {
         <div className="text-center p-8 rounded-2xl bg-gradient-to-r from-purple-900/30 to-night-light border border-purple-500/20">
           <h3 className="text-xl font-bold text-white mb-3">Vous n'avez pas encore d'établissement sur la plateforme ?</h3>
           <p className="text-muted mb-6 max-w-xl mx-auto">
-            Proposez votre hôtel, auberge ou restaurant. Après validation par notre équipe, vous recevrez votre code d'accès personnel par notification.
+            Proposez votre hôtel, auberge ou restaurant. Après validation par notre équipe, vous recevrez votre code d'accès personnel unique.
           </p>
           <Link
             href="/professional-space/propose"
