@@ -1,142 +1,109 @@
+'use client';
+
 import Link from 'next/link';
-import { Building2, Plus, Edit, Eye } from 'lucide-react';
-import mongoose from 'mongoose';
-import { Accommodation } from '@/models/Accommodation';
+import { Hotel, Utensils, Palette, Store, User, Settings, LogOut, PlusCircle } from 'lucide-react';
 
-export const metadata = {
-  title: 'Mes établissements | Kpalimé-Trade',
-  description: 'Gérez vos hôtels et hébergements',
-};
+export default function DashboardPage() {
+  const userName = "Utilisateur"; // Sera remplacé dynamiquement plus tard
 
-// Connexion directe à MongoDB
-async function connectDB() {
-  if (mongoose.connections[0].readyState) return;
-  const MONGODB_URI = process.env.MONGODB_URI;
-  if (!MONGODB_URI) throw new Error('MONGODB_URI non défini');
-  await mongoose.connect(MONGODB_URI);
-}
-
-export default async function DashboardAccommodationsPage() {
-  let accommodations: any[] = [];
-  let error: string | null = null;
-
-  try {
-    await connectDB();
-
-    // ID de test (à remplacer par l'ID réel de l'utilisateur connecté)
-    const ownerId = '674f3b8e9c8d4e001f8b4567';
-
-    // Récupérer directement les établissements depuis MongoDB
-    accommodations = await Accommodation.find({ ownerId: new mongoose.Types.ObjectId(ownerId) })
-      .select('-documents')
-      .sort({ createdAt: -1 })
-      .lean();
-
-  } catch (err: any) {
-    console.error('Erreur chargement établissements:', err);
-    error = 'Impossible de charger vos établissements.';
-  }
-
-  const getStatusBadge = (status: string) => {
-    const badges: Record<string, { color: string; label: string }> = {
-      draft: { color: 'bg-gray-500/20 text-gray-300', label: 'Brouillon' },
-      pending: { color: 'bg-yellow-500/20 text-yellow-300', label: 'En attente' },
-      approved: { color: 'bg-emerald-brand/20 text-emerald-brand', label: 'Approuvé' },
-      rejected: { color: 'bg-red-500/20 text-red-300', label: 'Refusé' },
-      needs_correction: { color: 'bg-orange-500/20 text-orange-300', label: 'À corriger' },
-      suspended: { color: 'bg-purple-500/20 text-purple-300', label: 'Suspendu' },
-    };
-    
-    const badge = badges[status] || badges.draft;
-    
-    return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${badge.color}`}>
-        {badge.label}
-      </span>
-    );
-  };
+  const categories = [
+    {
+      title: 'Hébergements & Hôtels',
+      description: 'Gérez vos propositions d\'hébergements et suivez leur statut de validation.',
+      icon: Hotel,
+      href: '/dashboard/accommodations',
+      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    },
+    {
+      title: 'Restaurants',
+      description: 'Ajoutez ou modifiez vos établissements de restauration et menus.',
+      icon: Utensils,
+      href: '/dashboard/restaurants',
+      color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    },
+    {
+      title: 'Culture & Artisanat',
+      description: 'Mettez en valeur vos produits culturels, artisanaux et événements.',
+      icon: Palette,
+      href: '/dashboard/culture',
+      color: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    },
+    {
+      title: 'Boutiques',
+      description: 'Gérez votre boutique en ligne, vos produits et vos commandes.',
+      icon: Store,
+      href: '/dashboard/boutiques',
+      color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    },
+  ];
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Mes établissements</h1>
-          <p className="text-muted text-sm">Gérez vos hôtels et hébergements</p>
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6 md:p-10">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Bonjour, {userName} 👋
+            </h1>
+            <p className="text-gray-400">
+              Bienvenue sur votre espace personnel Kpalim-Trade. Gérez toutes vos activités depuis ici.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Link 
+              href="/"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-sm font-medium border border-gray-700"
+            >
+              <User size={18} />
+              Voir mon profil
+            </Link>
+            <button 
+              className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm font-medium border border-red-500/20"
+              onClick={() => { window.location.href = '/'; }}
+            >
+              <LogOut size={18} />
+              Déconnexion
+            </button>
+          </div>
         </div>
-        
-        <Link 
-          href="/dashboard/accommodations/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
-        >
-          <Plus size={18} />
-          Ajouter un établissement
-        </Link>
-      </div>
 
-      {error && (
-        <div className="mb-6 p-4 rounded-md bg-red-500/10 border border-red-500/30 text-red-300">
-          {error}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Link 
+                key={category.title} 
+                href={category.href}
+                className={`group p-6 rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-xl bg-gray-900/50 ${category.color}`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="p-3 rounded-lg bg-gray-950 border border-gray-800 group-hover:border-gray-700 transition-colors">
+                    <Icon size={28} className={category.color.split(' ')[1]} />
+                  </div>
+                  <PlusCircle size={24} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-green-400 transition-colors">
+                  {category.title}
+                </h3>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  {category.description}
+                </p>
+              </Link>
+            );
+          })}
         </div>
-      )}
 
-      {accommodations.length === 0 && !error && (
-        <div className="text-center py-16 rounded-md border border-white/10 bg-night-light">
-          <Building2 size={48} className="text-muted mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Aucun établissement pour le moment</h3>
-          <p className="text-muted mb-6 max-w-md mx-auto">
-            Créez votre premier hôtel ou hébergement pour commencer à apparaître sur Kpalimé-Trade.
+        <div className="mt-10 p-6 bg-gray-900/50 border border-gray-800 rounded-xl">
+          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+            <Settings size={20} className="text-green-400" />
+            Besoin d'aide ?
+          </h3>
+          <p className="text-gray-400 text-sm">
+            Si vous rencontrez des difficultés pour ajouter un établissement ou si votre proposition reste en attente, 
+            n'hésitez pas à consulter notre guide ou à contacter le support administratif.
           </p>
-          <Link 
-            href="/dashboard/accommodations/new"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-emerald-brand text-white font-semibold hover:bg-emerald-light transition-all"
-          >
-            <Plus size={18} />
-            Créer mon premier établissement
-          </Link>
         </div>
-      )}
-
-      {accommodations.length > 0 && (
-        <div className="space-y-4">
-          {accommodations.map((hotel: any) => (
-            <div key={hotel._id} className="rounded-md border border-white/10 bg-night-light p-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-bold text-white">{hotel.name}</h3>
-                    {getStatusBadge(hotel.status)}
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted">
-                    <span>{hotel.type === 'hotel' ? 'Hôtel' : 'Hébergement'}</span>
-                    <span>•</span>
-                    <span>{hotel.city}</span>
-                    <span>•</span>
-                    <span>Créé le {new Date(hotel.createdAt).toLocaleDateString('fr-FR')}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/discover/regions/maritime/hotels/${hotel.slug}`}
-                    className="p-2 rounded-md bg-white/5 hover:bg-white/10 text-white transition-colors"
-                    title="Voir"
-                  >
-                    <Eye size={18} />
-                  </Link>
-                  <Link
-                    href={`/dashboard/accommodations/${hotel._id}/edit`}
-                    className="p-2 rounded-md bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 transition-colors"
-                    title="Modifier"
-                  >
-                    <Edit size={18} />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
