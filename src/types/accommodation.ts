@@ -82,10 +82,8 @@ export interface IAccommodation {
   // Propriétaire
   ownerId: Types.ObjectId;
   ownerName: string;
-  ownerCode?: string; // ⭐ AJOUTE CETTE LIGNE ICI
+  ownerCode?: string; // ⭐ Code à 4 chiffres pour l'espace pro
   
-  // Statut et validation
-  status: AccommodationStatus;
   // Statut et validation
   status: AccommodationStatus;
   isActive: boolean;
@@ -146,6 +144,7 @@ export interface ICreateAccommodation {
   amenities: string[];
   verificationConfirmed: boolean;
   ownerId: string;
+  ownerCode?: string; // ⭐ Ajouté ici aussi pour la création
 }
 
 export interface IUpdateAccommodation {
