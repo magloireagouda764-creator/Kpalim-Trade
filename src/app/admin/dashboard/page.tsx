@@ -6,8 +6,19 @@ import { Product } from '@/models/Product';
 import { Accommodation } from '@/models/Accommodation';
 import { Restaurant } from '@/models/Restaurant';
 import { Users, Store, Package, Hotel, UtensilsCrossed, Clock, Bell, CheckCircle, AlertTriangle } from 'lucide-react';
+
+// ⭐ FORCER LE RENDU DYNAMIQUE (Empêche le cache de Next.js)
+export const dynamic = 'force-dynamic';
+
 async function DashboardStats() {
   await connectDB();
+
+  // ⭐ LOGS DE DÉBOGAGE : Nous verrons cela dans les logs Vercel
+  const totalCount = await Accommodation.countDocuments();
+  const pendingCount = await Accommodation.countDocuments({ status: 'pending' });
+  
+  console.log('🔍 DEBUG DB - Total Hébergements:', totalCount);
+  console.log('🔍 DEBUG DB - Hébergements en attente:', pendingCount);
 
   // Récupération des compteurs en parallèle pour la performance
   const [
@@ -24,12 +35,12 @@ async function DashboardStats() {
     User.countDocuments(),
     Shop.countDocuments(),
     Product.countDocuments(),
-    Accommodation.countDocuments(),
+    totalCount, // On utilise la variable déjà calculée
     Restaurant.countDocuments(),
     Shop.countDocuments({ status: 'pending' }),
     Product.countDocuments({ status: 'pending' }),
-    Accommodation.countDocuments({ status: 'pending' }), // Assure-toi que ce statut existe dans ton modèle
-    Restaurant.countDocuments({ status: 'pending' }),   // Assure-toi que ce statut existe dans ton modèle
+    pendingCount, // On utilise la variable déjà calculée
+    Restaurant.countDocuments({ status: 'pending' }),
   ]);
 
   const stats = [
@@ -120,7 +131,6 @@ async function DashboardStats() {
         })}
       </div>
 
-      {/* Section pour les actions rapides (à développer ensuite) */}
       <div className="mt-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
         <div className="flex flex-wrap gap-3">
