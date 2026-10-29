@@ -4,35 +4,35 @@ import Link from 'next/link';
 import { Hotel, Utensils, Palette, Store, User, Settings, LogOut, PlusCircle } from 'lucide-react';
 
 export default function DashboardPage() {
-  const userName = "Utilisateur"; // Sera remplacé dynamiquement plus tard
+  const userName = "Utilisateur";
 
   const categories = [
     {
       title: 'Hébergements & Hôtels',
       description: 'Gérez vos propositions d\'hébergements et suivez leur statut de validation.',
       icon: Hotel,
-      href: '/dashboard/accommodations',
+      href: '/admin/hotels',
       color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     },
     {
       title: 'Restaurants',
       description: 'Ajoutez ou modifiez vos établissements de restauration et menus.',
       icon: Utensils,
-      href: '/dashboard/restaurants',
+      href: '/admin/restaurants',
       color: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
     },
     {
       title: 'Culture & Artisanat',
       description: 'Mettez en valeur vos produits culturels, artisanaux et événements.',
       icon: Palette,
-      href: '/dashboard/culture',
+      href: '/admin/culture',
       color: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     },
     {
       title: 'Boutiques',
       description: 'Gérez votre boutique en ligne, vos produits et vos commandes.',
       icon: Store,
-      href: '/dashboard/boutiques',
+      href: '/admin/boutiques',
       color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     },
   ];
