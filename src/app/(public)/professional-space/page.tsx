@@ -169,22 +169,3 @@ export default function ProfessionalSpacePage() {
             })}
           </div>
         )}
-
-        {/* Appel à l'action pour les nouveaux */}
-        <div className="text-center p-8 rounded-2xl bg-gradient-to-r from-purple-900/30 to-night-light border border-purple-500/20">
-          <h3 className="text-xl font-bold text-white mb-3">Vous n'avez pas encore d'établissement sur la plateforme ?</h3>
-          <p className="text-muted mb-6 max-w-xl mx-auto">
-            Proposez votre hôtel, auberge ou restaurant. Après validation par notre équipe, vous recevrez votre code d'accès personnel unique.
-          </p>
-          <Link
-            href="/professional-space/propose"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-purple-600/20"
-          >
-            Proposer mon établissement <ArrowRight size={20} />
-          </Link>
-        </div>
-
-      </div>
-    </div>
-  );
-}
