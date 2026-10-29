@@ -45,4 +45,11 @@ export async function hashPassword(password: string): Promise<string> {
 // 6. Vérifier un mot de passe
 export async function verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
   return bcrypt.compare(plainPassword, hashedPassword);
+}// 7. Décoder un token SANS vérification (compatible Edge Runtime pour le middleware)
+export function decodeToken(token: string): any {
+  try {
+    return jwt.decode(token);
+  } catch (error) {
+    return null;
+  }
 }
