@@ -119,6 +119,15 @@ const AccommodationSchema = new Schema<IAccommodation>(
       type: String,
       required: [true, 'Le nom du propriétaire est obligatoire'],
     },
+    
+    // ⭐ NOUVEAU : CODE PROPRIÉTAIRE (Accès Espace Pro)
+    ownerCode: {
+      type: String,
+      length: 4,
+      unique: true,
+      sparse: true, // Permet d'avoir des documents sans code temporairement
+      match: /^[0-9]{4}$/, // Force exactement 4 chiffres
+    },
 
     // --- STATUT ET VALIDATION ---
     status: {
@@ -180,6 +189,9 @@ AccommodationSchema.index({ type: 1, status: 1 });
 
 // Index pour les établissements en vedette
 AccommodationSchema.index({ isFeatured: -1, status: 1 });
+
+// ⭐ NOUVEAU : Index pour le code propriétaire
+AccommodationSchema.index({ ownerCode: 1 }, { unique: true, sparse: true });
 
 // Index texte pour la recherche full-text
 AccommodationSchema.index({ 
