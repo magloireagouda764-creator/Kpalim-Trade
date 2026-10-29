@@ -82,7 +82,10 @@ export interface IAccommodation {
   // Propriétaire
   ownerId: Types.ObjectId;
   ownerName: string;
+  ownerCode?: string; // ⭐ AJOUTE CETTE LIGNE ICI
   
+  // Statut et validation
+  status: AccommodationStatus;
   // Statut et validation
   status: AccommodationStatus;
   isActive: boolean;
