@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     // 4. Générer un code d'accès unique
     const code = await OwnerCode.generateCode();
 
-    // 5. Valeurs par défaut pour capacity et roomsCount si non fournies (ex: pour un restaurant)
+    // 5. Valeurs par défaut pour capacity et roomsCount si non fournies
     const capacity = body.capacity ? Number(body.capacity) : 1;
     const roomsCount = body.roomsCount ? Number(body.roomsCount) : 1;
 
@@ -60,6 +60,7 @@ export async function POST(req: Request) {
       email: body.email,
       ownerId: new mongoose.Types.ObjectId(payload.userId),
       ownerName: body.ownerName,
+      ownerCode: code, // ⭐ CORRECTION CRUCIALE : Sauvegarder le code dans l'établissement
       capacity: capacity,
       roomsCount: roomsCount,
       priceRange: body.priceRange || 'Non spécifié',
@@ -68,8 +69,8 @@ export async function POST(req: Request) {
       isActive: false,
     });
 
-    // 7. Créer le code d'accès lié à cet établissement
-    const ownerCode = await OwnerCode.create({
+    // 7. Créer le code d'accès lié à cet établissement (pour traçabilité)
+    await OwnerCode.create({
       code,
       ownerId: new mongoose.Types.ObjectId(payload.userId),
       establishmentName: body.name,

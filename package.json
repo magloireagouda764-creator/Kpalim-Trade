@@ -13,6 +13,7 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
     "clsx": "^2.1.1",
+    "dotenv": "^18.0.9",
     "jose": "^6.0.11",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.460.0",
