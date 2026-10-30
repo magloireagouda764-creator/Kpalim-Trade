@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Key, Building2, MapPin, Phone, Users, Image as ImageIcon, FileText, AlertCircle } from 'lucide-react';
+import { Building2, MapPin, Phone, Users, FileText, AlertCircle } from 'lucide-react';
 
 export default function ProposeAccommodationPage() {
   const router = useRouter();
-  const [code, setCode] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -25,18 +24,6 @@ export default function ProposeAccommodationPage() {
     priceRange: '',
     amenities: [] as string[],
   });
-
-  // Générer un code au chargement de la page
-  useEffect(() => {
-    const generateCode = () => {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      const prefix = Array.from({ length: 2 }, () => letters.charAt(Math.floor(Math.random() * letters.length))).join('');
-      const suffix = Array.from({ length: 4 }, () => alphanumeric.charAt(Math.floor(Math.random() * alphanumeric.length))).join('');
-      setCode(`${prefix}-${suffix}`);
-    };
-    generateCode();
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -61,7 +48,7 @@ export default function ProposeAccommodationPage() {
       const res = await fetch('/api/accommodations/propose', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, code }),
+        body: JSON.stringify(formData),
       });
 
       const result = await res.json();
@@ -70,7 +57,7 @@ export default function ProposeAccommodationPage() {
         throw new Error(result.error || 'Erreur lors de la soumission');
       }
 
-      // Rediriger vers la page de confirmation avec le code
+      // Rediriger vers la page de confirmation avec le code généré
       router.push(`/propose/accommodation/confirmation?code=${result.data.code}&id=${result.data.accommodationId}`);
     } catch (err: any) {
       setError(err.message);
@@ -88,18 +75,20 @@ export default function ProposeAccommodationPage() {
   return (
     <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Code d'identification */}
-        <div className="mb-8 p-6 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg shadow-lg">
-          <div className="flex items-center gap-3 mb-2">
-            <Key className="text-white" size={24} />
-            <h2 className="text-xl font-bold text-white">Votre code d'identification</h2>
+        {/* Message informatif au lieu du code */}
+        <div className="mb-8 p-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-white shrink-0 mt-1" size={24} />
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Important : Code d'identification unique</h2>
+              <p className="text-white/90 text-sm leading-relaxed">
+                Après la soumission de votre formulaire, un <strong>code d'identification unique à 6 caractères</strong> vous sera attribué. 
+                Ce code vous permettra d'accéder à votre espace professionnel après validation par notre équipe. 
+                <br /><br />
+                <strong>️ Conservez-le précieusement !</strong> Il vous sera demandé à chaque connexion.
+              </p>
+            </div>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center">
-            <p className="text-3xl font-mono font-bold text-white tracking-wider">{code}</p>
-          </div>
-          <p className="text-white/90 text-sm mt-3">
-            ⚠️ <strong>Conservez ce code précieusement.</strong> Il vous sera demandé pour accéder à votre espace après validation.
-          </p>
         </div>
 
         {/* Formulaire */}
@@ -331,7 +320,7 @@ export default function ProposeAccommodationPage() {
             {/* Section 6: Équipements */}
             <section>
               <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                <ImageIcon size={20} /> Équipements & Services
+                <FileText size={20} /> Équipements & Services
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {amenitiesList.map((amenity) => (
